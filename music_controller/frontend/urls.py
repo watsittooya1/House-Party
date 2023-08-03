@@ -5,4 +5,6 @@ urlpatterns = [
     path('', index),
     path('join', index),
     path('create', index),
+    # Django dynamic url
+    path('room/<str:roomCode>', index)
 ]
