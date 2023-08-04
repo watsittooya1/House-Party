@@ -1,8 +1,11 @@
 from django.urls import path
 from .views import index
 
+app_name = 'frontend'
+
 urlpatterns = [
-    path('', index),
+    # this name='' needed for spotify app to redirect here
+    path('', index, name=''),
     path('join', index),
     path('create', index),
     # Django dynamic url

@@ -1,8 +1,7 @@
 import React, { Component } from "react";
 import { Button, Grid, Typography, TextField, FormHelperText, FormControl, FormControlLabel, RadioGroup, Radio } from "@mui/material";
 import { Link } from "react-router-dom";
-import { Collapse } from "@mui/material";
-import Alert from "@mui/lab/Alert";
+import { Collapse, Alert } from "@mui/material";
 
 
 export default class CreateRoomPage extends Component {
