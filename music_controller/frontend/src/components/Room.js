@@ -135,15 +135,16 @@ export default class Room extends Component {
     getCurrentSong() {
         fetch('/spotify/current-song')
             .then((response) => {
+                // this will intentionally cause a json error if response is not ok
                 if (!response.ok) {
                     return {};
                 } else {
                     return response.json();
-                }})
+                }
+            })
             .then((data) => {
                 this.setState({song: data});
                 console.log(data);
-
             });
     }
 
