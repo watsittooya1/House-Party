@@ -1,6 +1,6 @@
 import React, { Component } from "react";
-import RoomJoinPage from "./RoomJoinPage";
-import CreateRoomPage from "./CreateRoomPage";
+import RoomJoinPageFunctional from "./RoomJoinPageFunctional";
+import CreateRoomPageFunctional from "./CreateRoomPageFunctional";
 import Info from "./Info";
 import {
     Grid,
@@ -15,7 +15,7 @@ import {
   Link,
   Redirect,
 } from "react-router-dom";
-import Room from "./Room";
+import RoomFunctional from "./RoomFunctional";
 
 export default class HomePage extends Component {
   constructor(props) {
@@ -87,13 +87,13 @@ export default class HomePage extends Component {
                     ? (<Redirect to={`/room/${this.state.roomCode}`}/>)
                     : this.renderHomePage();
             }}/>
-          <Route path="/join" component={RoomJoinPage} />
+          <Route path="/join" component={RoomJoinPageFunctional} />
           <Route path="/info" component={Info} />
-          <Route path="/create" component={CreateRoomPage} />
+          <Route path="/create" component={CreateRoomPageFunctional} />
           <Route
             path="/room/:roomCode"
             render={(props) => {
-                return <Room {...props} leaveRoomCallback={this.clearRoomCode}/>
+                return <RoomFunctional {...props} leaveRoomCallback={this.clearRoomCode}/>
             }}
            />
         </Switch>

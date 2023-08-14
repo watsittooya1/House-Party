@@ -4,8 +4,8 @@ import {
     Button,
     Typography
 } from "@mui/material";
-import CreateRoomPage from "./CreateRoomPage";
-import MusicPlayer from "./MusicPlayer";
+import CreateRoomPageFunctional from "./CreateRoomPageFunctional";
+import MusicPlayerFunctional from "./MusicPlayerFunctional";
 
 export default class Room extends Component { 
     constructor(props) {
@@ -61,7 +61,7 @@ export default class Room extends Component {
         return (
             <Grid container spacing={1}>
                 <Grid item xs={12} align="center">
-                    <CreateRoomPage
+                    <CreateRoomPageFunctional
                         update={true}
                         votesToSkip={this.state.votesToSkip}
                         guestCanPause={this.state.guestCanPause}
@@ -135,8 +135,7 @@ export default class Room extends Component {
     getCurrentSong() {
         fetch('/spotify/current-song')
             .then((response) => {
-                // this will intentionally cause a json error if response is not ok
-                if (!response.ok) {
+                if (!response.ok || response.status === 204) {
                     return {};
                 } else {
                     return response.json();
@@ -144,9 +143,17 @@ export default class Room extends Component {
             })
             .then((data) => {
                 this.setState({song: data});
-                console.log(data);
             });
     }
+
+    isEmpty(obj) {
+        for (const prop in obj) {
+            if (Object.hasOwn(obj, prop)) {
+                return false;
+            }
+        }
+        return true;
+      }
 
     render() {
         if (this.state.showSettings) {
@@ -159,7 +166,7 @@ export default class Room extends Component {
                     Code: {this.roomCode}
                 </Typography>
             </Grid>
-            <MusicPlayer {...this.state.song} />
+            <MusicPlayerFunctional {...this.state.song} nonePlaying={this.isEmpty(this.state.song)}/>
             {this.state.isHost ? this.renderSettingsButton() : null}
             <Grid item xs={12} align="center">
                 <Button variant="contained" color="secondary" onClick={this.leaveButtonPressed}>

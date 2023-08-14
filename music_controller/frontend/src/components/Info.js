@@ -6,7 +6,7 @@ import { Link } from "react-router-dom";
 
 
 const pages = {
-    JOIN: "pages.joinn",
+    JOIN: "pages.join",
     CREATE: "pages.create",
 };
 
