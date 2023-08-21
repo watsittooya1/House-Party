@@ -43,7 +43,7 @@ def is_spotify_authenticated(session_id):
     tokens = get_user_tokens(session_id)
     if tokens:
         expiry = tokens.expires_in
-        if expiry <= timezone.now():
+        if True: #expiry <= timezone.now():
             refresh_spotify_token(session_id)
         return True
     return False
@@ -96,5 +96,7 @@ def pause_song(session_id):
 def skip_song(session_id):
     return execute_spotify_api_request(session_id, "player/next", post_=True)
 
+def get_queue(session_id):
+    return execute_spotify_api_request(session_id, "player/queue")
 
 

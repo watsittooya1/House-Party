@@ -7,6 +7,8 @@ import {
 import { useHistory } from "react-router-dom";
 import CreateRoomPageFunctional from "./CreateRoomPageFunctional";
 import MusicPlayerFunctional from "./MusicPlayerFunctional";
+import WebPlayback from "./WebPlayback";
+import SongQueue from "./SongQueue";
 
 export default function RoomFunctional(props) { 
     const [votesToSkip, setVotesToSkip] = useState(2);
@@ -14,7 +16,7 @@ export default function RoomFunctional(props) {
     const [isHost, setIsHost] = useState(false);
     const [showSettings, setShowSettings] = useState(false);
     const [spotifyAuthenticated, setSpotifyAuthenticated] = useState(false);
-    const [song, setSong] = useState({});
+    const [token, setToken] = useState(undefined);
 
     // match is prop, added by router, describing how we got to this component
     const roomCode = props.match.params.roomCode;
@@ -22,13 +24,7 @@ export default function RoomFunctional(props) {
 
     useEffect(() => {
         getRoomDetails();
-        getCurrentSong();
     }, []);
-
-    useEffect(() => {
-        const interval = setInterval(getCurrentSong, 1000);
-        return (() => clearInterval(interval));
-    });
 
     function updateShowSettings(value) {
         setShowSettings(value);
@@ -112,56 +108,52 @@ export default function RoomFunctional(props) {
                         .then((response) => response.json())
                         .then((data) => {
                             window.location.replace(data.url);
-                        })
-                }
-            });
-    }
-
-    function getCurrentSong() {
-        fetch('/spotify/current-song')
-            .then((response) => {
-                if (!response.ok || response.status === 204) {
-                    return {};
+                        });
                 } else {
-                    return response.json();
+                    // set auth token for web playback controller
+                    fetch('/spotify/get-auth-token')
+                        .then((response) => {
+                            if (response.ok) {
+                                return response.json();
+                            }
+                            props.leaveRoomCallback();
+                            history.push('/');
+                        })
+                        .then((data) => {
+                            setToken(data.token);
+                        });
                 }
-            })
-            .then((data) => {
-                setSong(data);
             });
-    }
-
-    function isEmpty(obj) {
-        for (const prop in obj) {
-            if (Object.hasOwn(obj, prop)) {
-                return false;
-            }
-        }
-        return true;
     }
 
     if (showSettings) {
         return renderSettings();
     }
     return (
-        <Grid container spacing={1}>
-            <Grid item xs={12} align="center">
-                <Typography variant="h4" component="h4">
-                    Code: {roomCode}
-                </Typography>
-                { isHost
-                ? <Typography color="textSecondary" variant="subtitle1" padding='1px'>You are host</Typography>
-                : null
-                }
+        <div>
+            { token
+            ? <WebPlayback token={token}/>
+            : null }
+            <Grid container spacing={1}>
+                <Grid item xs={12} align="center">
+                    <Typography variant="h4" component="h4">
+                        Code: {roomCode}
+                    </Typography>
+                    { isHost
+                    ? <Typography color="textSecondary" variant="subtitle1" padding='1px'>You are host</Typography>
+                    : null
+                    }
+                </Grid>
+                <MusicPlayerFunctional />
+                {isHost ? renderSettingsButton() : null}
+                <Grid item xs={12} align="center">
+                    <Button variant="contained" color="secondary" onClick={leaveButtonPressed}>
+                        Leave Room
+                    </Button>
+                </Grid>
             </Grid>
-            <MusicPlayerFunctional {...song} nonePlaying={isEmpty(song)}/>
-            {isHost ? renderSettingsButton() : null}
-            <Grid item xs={12} align="center">
-                <Button variant="contained" color="secondary" onClick={leaveButtonPressed}>
-                    Leave Room
-                </Button>
-            </Grid>
-        </Grid>
+            <SongQueue/>
+        </div>
     );
 
 }

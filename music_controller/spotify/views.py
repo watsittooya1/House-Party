@@ -13,7 +13,7 @@ from .models import Vote
 class AuthURL(APIView):
     def get(self, request, format=None):
         # found from Spotify API documentation
-        scopes = 'user-read-playback-state user-modify-playback-state user-read-currently-playing'
+        scopes = 'streaming user-read-playback-state user-modify-playback-state user-read-currently-playing'
         url = Request('GET', 'https://accounts.spotify.com/authorize', params={
             'scope': scopes,
             'response_type': 'code',
@@ -22,6 +22,18 @@ class AuthURL(APIView):
         }).prepare().url
 
         return Response({'url': url}, status=status.HTTP_200_OK)
+
+
+class GetAuthToken(APIView):
+    def get(self, request, format=None):
+        if not request.session.exists(request.session.session_key):
+            request.session.create()
+
+        token = get_user_tokens(request.session.session_key)
+        if token == None:
+            return Response({}, status=status.HTTP_401_UNAUTHORIZED)
+        return Response({'token':token.access_token}, status=status.HTTP_200_OK)
+
 
 # request for access/refresh token
 def spotify_callback(request, format=None):
@@ -155,3 +167,24 @@ class SkipSong(APIView):
             vote.save()
 
         return Response({}, status=status.HTTP_204_NO_CONTENT)
+
+
+class GetQueue(APIView):
+    def get(self, request, format=None):
+        room_code = self.request.session.get('room_code')
+        room = Room.objects.filter(code=room_code)[0]
+
+        res = get_queue(room.host)
+        songs = []
+        for item in res.get("queue"):
+            song = {
+                "album":item.get("album").get("name"),
+                "image":item.get("album").get("images")[0],
+                "artists":map(lambda a: a.get("name"), item.get("artists")),
+                "name":item.get("name"),
+                "id":item.get("id")
+            }
+            songs.append(song)
+
+        return Response(songs, status=status.HTTP_200_OK)
+
