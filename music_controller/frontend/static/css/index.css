@@ -29,3 +29,16 @@ html, body {
     transform: translate(-50%, -50%);
     
 }
+
+.sidebar {
+    position: absolute;
+    top: 0%;
+    left: 0;
+    height: 100%;
+    width: 18%;
+}
+
+.scrollable {
+    height: 95vh;
+    overflow-y: scroll;
+}

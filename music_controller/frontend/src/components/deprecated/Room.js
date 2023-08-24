@@ -4,8 +4,8 @@ import {
     Button,
     Typography
 } from "@mui/material";
-import CreateRoomPageFunctional from "./CreateRoomPageFunctional";
-import MusicPlayerFunctional from "./MusicPlayerFunctional";
+import CreateRoomPageFunctional from "../CreateRoomPageFunctional";
+import MusicPlayerFunctional from "../MusicPlayerFunctional";
 
 export default class Room extends Component { 
     constructor(props) {

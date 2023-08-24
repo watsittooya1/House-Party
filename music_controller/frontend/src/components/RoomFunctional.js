@@ -8,7 +8,6 @@ import { useHistory } from "react-router-dom";
 import CreateRoomPageFunctional from "./CreateRoomPageFunctional";
 import MusicPlayerFunctional from "./MusicPlayerFunctional";
 import WebPlayback from "./WebPlayback";
-import SongQueue from "./SongQueue";
 
 export default function RoomFunctional(props) { 
     const [votesToSkip, setVotesToSkip] = useState(2);
@@ -151,8 +150,11 @@ export default function RoomFunctional(props) {
                         Leave Room
                     </Button>
                 </Grid>
+                <Grid item xs={12} align="center">
+                    
+                </Grid>
             </Grid>
-            <SongQueue/>
+            
         </div>
     );
 
