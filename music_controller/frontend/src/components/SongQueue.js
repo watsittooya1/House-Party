@@ -12,6 +12,7 @@ import {
 
 export default function SongQueue(props) {
  
+    const [hidden, setHidden] = useState(true);
     const [queue, setQueue] = useState([]);
 
     useEffect(() => {
@@ -25,13 +26,30 @@ export default function SongQueue(props) {
 
     async function checkQueue() {
         // ensure response is OK
-        await fetch('/spotify/get-queue')
+        await fetch('/api/user-in-room')
             .then((response) => response.json())
-            .then((data) => {
-                setQueue(data);
-                });
+            .then(async (data) => {
+                if (data.code) {
+                    setHidden(false);
+                    await fetch('/spotify/get-queue')
+                        .then((response) => response.json())
+                        .then((data) => {
+                            setQueue(data);
+                        });
+                } else {
+                    setHidden(true);
+                }
+            });
+        // await fetch('/spotify/get-queue')
+        //     .then((response) => response.json())
+        //     .then((data) => {
+        //         setQueue(data);
+        //         });
     }
 
+    if (hidden) {
+        return null;
+    }
     return (
         <Card width="100%">
             <Typography component="h5" variant="h5" align="center" margin="5px" height="3vh">Next In Queue</Typography>
