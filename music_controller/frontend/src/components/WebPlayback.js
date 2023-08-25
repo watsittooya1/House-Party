@@ -5,7 +5,6 @@ export default function WebPlayback(props) {
     const [_player, setPlayer] = useState(undefined);
 
     useEffect(() => {
-
         const script = document.createElement("script");
         script.src = "https://sdk.scdn.co/spotify-player.js";
         script.async = true;
@@ -49,14 +48,11 @@ export default function WebPlayback(props) {
     
             player.connect();
         };
-    }, []); 
-
-    useEffect(() => {
         return (()=>{
             if (_player) {
                 _player.disconnect();
             }});
-    }, []);
+    }, []); 
 
    return (
       <>

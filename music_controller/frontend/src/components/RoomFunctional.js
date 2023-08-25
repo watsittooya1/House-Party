@@ -129,15 +129,8 @@ export default function RoomFunctional(props) {
             });
     }
 
-    if (showSettings) {
-        return renderSettings();
-    }
-    return (
-        <div>
-            { token
-            ? <WebPlayback token={token}/>
-            : null }
-            <Grid container spacing={1}>
+    function renderRoom() {
+        return (<Grid container spacing={1}>
                 <Grid item xs={12} align="center">
                     <Typography variant="h4" component="h4">
                         Code: {roomCode}
@@ -158,8 +151,17 @@ export default function RoomFunctional(props) {
                         </Grid>
                     </Grid>
                 </Grid>
-            </Grid>
-            
+            </Grid>);
+    }
+
+    return (
+        <div>
+            { token
+            ? <WebPlayback token={token}/>
+            : null }
+            { showSettings
+                ? renderSettings()
+                : renderRoom() }
         </div>
     );
 
