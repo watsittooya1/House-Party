@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import {
     Grid,
     Button,
-    Typography
+    Typography,
+    Container
 } from "@mui/material";
 import { useHistory } from "react-router-dom";
 import CreateRoomPageFunctional from "./CreateRoomPageFunctional";
@@ -12,6 +13,7 @@ import WebPlayback from "./WebPlayback";
 export default function RoomFunctional(props) { 
     const [votesToSkip, setVotesToSkip] = useState(2);
     const [guestCanPause, setGuestCanPause] = useState(false);
+    const [guestCanQueue, setGuestCanQueue] = useState(false);
     const [isHost, setIsHost] = useState(false);
     const [showSettings, setShowSettings] = useState(false);
     const [spotifyAuthenticated, setSpotifyAuthenticated] = useState(false);
@@ -31,10 +33,10 @@ export default function RoomFunctional(props) {
 
     function renderSettingsButton() {
         return (
-            <Grid item xs={12} align="center">
-                <Button variant="contained" color="primary" onClick={()=>updateShowSettings(true)}>
+            <Grid item>
+            <Button variant="contained" color="primary" onClick={()=>updateShowSettings(true)}>
                     Settings
-                </Button>
+            </Button>
             </Grid>
         );
     }
@@ -47,6 +49,7 @@ export default function RoomFunctional(props) {
                         update={true}
                         votesToSkip={votesToSkip}
                         guestCanPause={guestCanPause}
+                        guestCanQueue={guestCanQueue}
                         roomCode={roomCode}
                         updateCallback={getRoomDetails}
                         />
@@ -76,6 +79,7 @@ export default function RoomFunctional(props) {
             .then((data) => {
                 setVotesToSkip(data.votes_to_skip);
                 setGuestCanPause(data.guest_can_pause);
+                setGuestCanQueue(data.guest_can_queue);
                 setIsHost(data.is_host);
                 if (data.is_host) {
                     authenticateSpotify();
@@ -144,14 +148,15 @@ export default function RoomFunctional(props) {
                     }
                 </Grid>
                 <MusicPlayerFunctional />
-                {isHost ? renderSettingsButton() : null}
                 <Grid item xs={12} align="center">
-                    <Button variant="contained" color="secondary" onClick={leaveButtonPressed}>
-                        Leave Room
-                    </Button>
-                </Grid>
-                <Grid item xs={12} align="center">
-                    
+                    <Grid container spacing={1} justifyContent="center">
+                        {isHost ? renderSettingsButton() : null}
+                        <Grid item>
+                            <Button variant="contained" color="secondary" onClick={leaveButtonPressed}>
+                                Leave Room
+                            </Button>
+                        </Grid>
+                    </Grid>
                 </Grid>
             </Grid>
             

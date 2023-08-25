@@ -7,12 +7,14 @@ import { Collapse, Alert } from "@mui/material";
 export default function CreateRoomPageFunctional({
     votesToSkip=2,
     guestCanPause=true,
+    guestCanQueue=true,
     update=false,
     roomCode=null,
     updateCallback=()=>{},
 }) {
 
     const [_guestCanPause, setGuestCanPause] = useState(guestCanPause);
+    const [_guestCanQueue, setGuestCanQueue] = useState(guestCanQueue);
     const [_votesToSkip, setVotesToSkip] = useState(votesToSkip);
     const [_errorMsg, setErrorMsg] = useState("");
     const [_successMsg, setSuccessMsg] = useState("");
@@ -28,6 +30,10 @@ export default function CreateRoomPageFunctional({
         setGuestCanPause(e.target.value === 'true' ? true : false);
     }
 
+    function handleGuestCanQueueChange(e) {
+        setGuestCanQueue(e.target.value === 'true' ? true : false);
+    }
+
     function handleRoomButtonPressed() {
         //sending request to endpoint
         const requestOptions = {
@@ -36,6 +42,7 @@ export default function CreateRoomPageFunctional({
             body: JSON.stringify({
                 votes_to_skip: _votesToSkip,
                 guest_can_pause: _guestCanPause,
+                guest_can_queue: _guestCanQueue,
             })
         };
         fetch('/api/create-room', requestOptions)
@@ -50,6 +57,7 @@ export default function CreateRoomPageFunctional({
             body: JSON.stringify({
                 votes_to_skip: _votesToSkip,
                 guest_can_pause: _guestCanPause,
+                guest_can_queue: _guestCanQueue,
                 code: roomCode
             })
         };
@@ -142,23 +150,44 @@ export default function CreateRoomPageFunctional({
                             labelPlacement="bottom"/>
                     </RadioGroup>
                 </FormControl>
-                <Grid item xs={12} align="center">
-                    <FormControl>
-                        <TextField
-                            required={true}
-                            type="number"
-                            defaultValue={_votesToSkip}
-                            inputProps={{
-                                min: 1,
-                                style: {textAlign: "center"}
-                            }}
-                            onChange={handleVotesChange}/>
-                        <FormHelperText>
-                            <div align="center">Votes Required to Skip Song</div>
-                        </FormHelperText>
-                    </FormControl>
-                    {update ? renderUpdateButtons() : renderCreateButtons()}
-                </Grid>
+            </Grid>
+            <Grid item xs={12} align="center">
+                <FormControl component="fieldset">
+                    <FormHelperText>
+                        <div align="center">Guest Ability to Queue Songs</div>
+                    </FormHelperText>
+                    <RadioGroup row defaultValue={guestCanQueue.toString()} onChange={handleGuestCanQueueChange}>
+                        <FormControlLabel
+                            value="true"
+                            control={<Radio color="primary" />}
+                            label="Can Queue"
+                            labelPlacement="bottom"/>
+                        <FormControlLabel
+                            value="false"
+                            control={<Radio color="primary" />}
+                            label="Cannot"
+                            labelPlacement="bottom"/>
+                    </RadioGroup>
+                </FormControl>
+            </Grid>
+            <Grid item xs={12} align="center">
+                <FormControl>
+                    <FormHelperText>
+                        <div align="center">Votes Required to Skip Song</div>
+                    </FormHelperText>
+                    <TextField
+                        required={true}
+                        type="number"
+                        defaultValue={_votesToSkip}
+                        inputProps={{
+                            min: 1,
+                            style: {textAlign: "center"}
+                        }}
+                        onChange={handleVotesChange}/>
+                </FormControl>
+            </Grid>
+            <Grid item xs={12} align="center">
+                {update ? renderUpdateButtons() : renderCreateButtons()}
             </Grid>
         </Grid>
     )

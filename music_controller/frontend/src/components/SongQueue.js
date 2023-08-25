@@ -40,11 +40,6 @@ export default function SongQueue(props) {
                     setHidden(true);
                 }
             });
-        // await fetch('/spotify/get-queue')
-        //     .then((response) => response.json())
-        //     .then((data) => {
-        //         setQueue(data);
-        //         });
     }
 
     if (hidden) {
