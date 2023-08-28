@@ -9,6 +9,7 @@ import { useHistory } from "react-router-dom";
 import CreateRoomPageFunctional from "./CreateRoomPageFunctional";
 import MusicPlayerFunctional from "./MusicPlayerFunctional";
 import WebPlayback from "./WebPlayback";
+import QueueMenu from "./QueueMenu";
 
 export default function RoomFunctional(props) { 
     const [votesToSkip, setVotesToSkip] = useState(2);
@@ -16,6 +17,7 @@ export default function RoomFunctional(props) {
     const [guestCanQueue, setGuestCanQueue] = useState(false);
     const [isHost, setIsHost] = useState(false);
     const [showSettings, setShowSettings] = useState(false);
+    const [showQueueSearch, setShowQueueSearch] = useState(false);
     const [spotifyAuthenticated, setSpotifyAuthenticated] = useState(false);
     const [token, setToken] = useState(undefined);
 
@@ -27,16 +29,22 @@ export default function RoomFunctional(props) {
         getRoomDetails();
     }, []);
 
-    function updateShowSettings(value) {
-        setShowSettings(value);
-    }
-
     function renderSettingsButton() {
         return (
             <Grid item>
-            <Button variant="contained" color="primary" onClick={()=>updateShowSettings(true)}>
+            <Button variant="contained" color="primary" onClick={()=>setShowSettings(true)}>
                     Settings
             </Button>
+            </Grid>
+        );
+    }
+
+    function renderQueueSearchButton() {
+        return (
+            <Grid item>
+                <Button variant="contained" color="primary" onClick={()=>setShowQueueSearch(true)}>
+                    Queue Song
+                </Button>
             </Grid>
         );
     }
@@ -58,12 +66,16 @@ export default function RoomFunctional(props) {
                     <Button
                         variant="contained"
                         color="secondary"
-                        onClick={()=> updateShowSettings(false)}>
+                        onClick={()=> setShowSettings(false)}>
                             Close
                     </Button>
                 </Grid>
             </Grid>
         );
+    }
+
+    function renderQueueSearch() {
+        return (<QueueMenu closeMenuCallback={()=>setShowQueueSearch(false)}/>);
     }
 
     function getRoomDetails() {
@@ -140,10 +152,13 @@ export default function RoomFunctional(props) {
                     : null
                     }
                 </Grid>
-                <MusicPlayerFunctional />
+                <Grid item xs={12} align="center">
+                    <MusicPlayerFunctional />
+                </Grid>
                 <Grid item xs={12} align="center">
                     <Grid container spacing={1} justifyContent="center">
                         {isHost ? renderSettingsButton() : null}
+                        {(isHost || guestCanQueue) ? renderQueueSearchButton() : null}
                         <Grid item>
                             <Button variant="contained" color="secondary" onClick={leaveButtonPressed}>
                                 Leave Room
@@ -155,13 +170,17 @@ export default function RoomFunctional(props) {
     }
 
     return (
-        <div>
+        <div className="room">
             { token
             ? <WebPlayback token={token}/>
             : null }
             { showSettings
                 ? renderSettings()
-                : renderRoom() }
+                : (
+                    showQueueSearch
+                        ? renderQueueSearch()
+                        : renderRoom()
+                    )}
         </div>
     );
 

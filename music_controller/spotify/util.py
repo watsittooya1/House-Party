@@ -76,15 +76,17 @@ def execute_spotify_api_request(session_id, endpoint, post_=False, put_=False):
         'Authorization': 'Bearer ' + tokens.access_token
     }
     if post_:
-        post(BASE_URL + endpoint, headers=headers)
+        response = post(BASE_URL + endpoint, headers=headers)
     elif put_:
-        put(BASE_URL + endpoint, headers=headers)
+        response = put(BASE_URL + endpoint, headers=headers)
     else:
         response = get(BASE_URL + endpoint, {}, headers=headers)
     try:
         return response.json()
-    except:
-        return {'Error': 'Issue with request'}
+    except ValueError as e:
+        return
+    except Exception as e:
+        return {'Error': f'issue with request, {e}'}
 
 
 def play_song(session_id):
@@ -98,5 +100,23 @@ def skip_song(session_id):
 
 def get_queue(session_id):
     return execute_spotify_api_request(session_id, "player/queue")
+
+def search_track(session_id, track_query):
+    tokens = get_user_tokens(session_id)
+    headers = {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + tokens.access_token
+    }
+    endpoint = "https://api.spotify.com/v1/search/?q=" + track_query + "&type=track";
+    response = get(endpoint, {}, headers=headers)
+    try:
+        return response.json()
+    except Exception as e:
+        return {'Error': f'issue with request, {e}'}
+
+def add_to_queue(session_id, track_uri):
+    return execute_spotify_api_request(session_id, f'player/queue?uri={track_uri}', post_=True)
+
+
 
 

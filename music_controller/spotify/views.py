@@ -187,4 +187,38 @@ class GetQueue(APIView):
             songs.append(song)
 
         return Response(songs, status=status.HTTP_200_OK)
+    
+
+class SearchTrack(APIView):
+    def get(self, request, format=None):
+        room_code = self.request.session.get('room_code')
+        room = Room.objects.filter(code=room_code)[0]
+
+        track_query = request.GET.get('track')
+
+        res = search_track(room.host, track_query)
+
+        songs = []
+        for item in res.get("tracks").get("items"):
+            song = {
+                "album":item.get("album").get("name"),
+                "image":item.get("album").get("images")[0],
+                "artists":map(lambda a: a.get("name"), item.get("artists")),
+                "name":item.get("name"),
+                "uri":item.get("uri")
+            }
+            songs.append(song)
+
+        return Response(songs, status=status.HTTP_200_OK)
+
+
+class AddToQueue(APIView):
+    def post(self, request, format=None):
+        room_code = self.request.session.get('room_code')
+        room = Room.objects.filter(code=room_code)[0]
+
+        track_uri = request.GET.get('uri')
+        add_to_queue(room.host, track_uri)
+        
+        return Response({}, status=status.HTTP_200_OK)
 

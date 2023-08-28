@@ -22,16 +22,6 @@ export default function HomePageFunctional(props) {
     const [roomCode, setRoomCode] = useState(null);
 
     useEffect(() => {
-        /*
-        (async ()=>{
-            fetch('/api/user-in-room')
-            .then((response) => response.json())
-            .then((data) => {
-                setRoomCode(data.code);
-                console.log(`roomcode set to ${data.code}`);
-            });
-        })();
-        */
         fetch('/api/user-in-room')
         .then((response) => response.json())
         .then((data) => {

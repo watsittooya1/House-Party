@@ -101,7 +101,7 @@ export default function MusicPlayerFunctional(props) {
               Nothing playing!
             </Typography>
             <Typography color="textSecondary" variant="subtitle1">
-              Queue up a song to bring up the music controller.
+              Queue up a song to start up the music controller.
             </Typography>
             <div>
               <IconButton>
