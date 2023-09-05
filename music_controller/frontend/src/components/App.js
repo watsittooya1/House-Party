@@ -2,6 +2,7 @@ import React, { Component } from "react";
 import { createRoot } from "react-dom/client";
 import HomePageFunctional from "./HomePageFunctional";
 import SongQueue from "./SongQueue";
+import AuthBar from "./AuthBar";
 
 export default class App extends Component { 
     constructor(props) {
@@ -12,6 +13,9 @@ export default class App extends Component {
     render() {
         return (
             <div>
+                <div className="appbar">
+                    <AuthBar />
+                </div>
                 <div className="center">
                     <HomePageFunctional />
                 </div>

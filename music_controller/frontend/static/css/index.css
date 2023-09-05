@@ -33,6 +33,12 @@ html, body {
     
 }
 
+.hzlayout {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
 .room {
     margin: 0 auto;
     transform: translate(13.5%, 0%);
@@ -42,7 +48,7 @@ html, body {
 
 .sidebar {
     position: absolute;
-    top: 0%;
+    top: 5vh;
     left: 0;
     height: 100%;
     width: 18%;
@@ -51,4 +57,9 @@ html, body {
 .scrollable {
     height: 95vh;
     overflow-y: scroll;
+}
+
+.appbar {
+    height: 5vh;
+    justify-content: center;
 }
