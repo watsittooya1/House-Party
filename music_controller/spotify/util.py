@@ -43,11 +43,12 @@ def is_spotify_authenticated(session_id):
     tokens = get_user_tokens(session_id)
     if tokens:
         expiry = tokens.expires_in
-        if True: #expiry <= timezone.now():
+        if expiry <= timezone.now():
             refresh_spotify_token(session_id)
         return True
     return False
 
+# returns true if refreshed, false if not logged in
 def refresh_spotify_token(session_id):
     refresh_token = get_user_tokens(session_id).refresh_token
     response = post('https://accounts.spotify.com/api/token', data={
@@ -60,6 +61,11 @@ def refresh_spotify_token(session_id):
     access_token = response.get('access_token')
     token_type = response.get('token_type')
     expires_in = response.get('expires_in')
+
+    # user is logged out
+    # if expires_in == None:
+    #     print("not logged in")
+    #     return
 
     update_or_create_user_tokens(
         session_id,
@@ -118,5 +124,18 @@ def add_to_queue(session_id, track_uri):
     return execute_spotify_api_request(session_id, f'player/queue?uri={track_uri}', post_=True)
 
 
-
+def get_user_name(session_id):
+    tokens = get_user_tokens(session_id)
+    if not tokens:
+        return None
+    headers = {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + tokens.access_token
+    }
+    endpoint = "https://api.spotify.com/v1/me"
+    response = get(endpoint, {}, headers=headers)
+    try:
+        return response.json()
+    except Exception as e:
+        return {'Error': f'issue with request, {e}'}
 

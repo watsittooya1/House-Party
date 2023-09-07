@@ -13,12 +13,14 @@ from .models import Vote
 class AuthURL(APIView):
     def get(self, request, format=None):
         # found from Spotify API documentation
+        show_dialog = False or request.GET.get('show-dialog')
         scopes = 'streaming user-read-playback-state user-modify-playback-state user-read-currently-playing'
         url = Request('GET', 'https://accounts.spotify.com/authorize', params={
             'scope': scopes,
             'response_type': 'code',
             'redirect_uri': REDIRECT_URI,
-            'client_id': CLIENT_ID, 
+            'client_id': CLIENT_ID,
+            'show_dialog': show_dialog,
         }).prepare().url
 
         return Response({'url': url}, status=status.HTTP_200_OK)
@@ -39,6 +41,10 @@ class GetAuthToken(APIView):
 def spotify_callback(request, format=None):
     code = request.GET.get('code')
     error = request.GET.get('error')
+
+    if error == "access_denied":
+        return redirect('frontend:')
+    
 
     response = post('https://accounts.spotify.com/api/token', data={
         'grant_type': 'authorization_code',
@@ -222,3 +228,16 @@ class AddToQueue(APIView):
         
         return Response({}, status=status.HTTP_200_OK)
 
+
+class GetUserName(APIView):
+    def get(self, request, format=None):
+
+        if not request.session.exists(request.session.session_key):
+            request.session.create()
+
+        res = get_user_name(request.session.session_key)
+        
+        if res == None:
+            return Response({"username":""}, status=status.HTTP_204_NO_CONTENT)
+
+        return Response({"username":res.get('display_name')}, status=status.HTTP_200_OK)

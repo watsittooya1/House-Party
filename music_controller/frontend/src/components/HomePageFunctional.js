@@ -43,17 +43,23 @@ export default function HomePageFunctional(props) {
                     </Typography>
                 </Grid>
                 <Grid item xs={12} align="center">
-                    <ButtonGroup disableElevation variant="contained" color="primary">
-                        <Button color="primary" to='/join' component={ Link }>
-                            Join a Room
-                        </Button>
-                        <Button color="secondary" to='/info' component={ Link }>
-                            Info
-                        </Button>
-                        <Button color="primary" to='/create' component={ Link }>
-                            Create a Room
-                        </Button>
-                    </ButtonGroup>
+                    <Grid container spacing={1} justifyContent="center">
+                        <Grid item>
+                            <Button color="primary" variant="contained" to='/join' component={ Link }>
+                                Join a Room
+                            </Button>
+                        </Grid>
+                        <Grid item>
+                            <Button color="secondary" variant="contained" to='/info' component={ Link }>
+                                Info
+                            </Button>
+                        </Grid>
+                        <Grid item>
+                            <Button color="primary" variant="contained" to='/create' component={ Link }>
+                                Create a Room
+                            </Button>
+                        </Grid>
+                    </Grid>
                 </Grid>
             </Grid>
         );

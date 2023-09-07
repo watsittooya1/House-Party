@@ -27,7 +27,7 @@ export default function Info(props) {
         + "ding on room settings, to control playback, queue songs, or skip tracks.";
     }
     function createInfo() {
-        return "Creating and hosting a room will require you to authenticate into Spotify Premium. "
+        return "Creating and hosting a room will require you to log in to Spotify Premium. "
         + "Afterwards, you can configure settings for whether guests can control playback, queue so"
         + "gs, or skip tracks. You'll also be given a randomly generated room code. Disbanding the "
         + "room closes it for all, so be careful!";
