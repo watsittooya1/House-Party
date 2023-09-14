@@ -15,7 +15,10 @@ def get_user_tokens(session_id):
 
 def update_or_create_user_tokens(session_id, access_token, token_type, expires_in, refresh_token):
     tokens = get_user_tokens(session_id)
-    expires_in = timezone.now() + timedelta(seconds=expires_in)
+    if expires_in != None:
+        expires_in = timezone.now() + timedelta(seconds=expires_in)
+    else:
+        expires_in = timezone.now()
     
     if tokens:
         tokens.access_token = access_token
@@ -44,8 +47,9 @@ def is_spotify_authenticated(session_id):
     if tokens:
         expiry = tokens.expires_in
         if expiry <= timezone.now():
-            refresh_spotify_token(session_id)
-        return True
+            return refresh_spotify_token(session_id)
+        else:
+            return True
     return False
 
 # returns true if refreshed, false if not logged in
@@ -58,14 +62,17 @@ def refresh_spotify_token(session_id):
         'client_secret': CLIENT_SECRET
     }).json()
 
+    # refresh token revoked
+    if response.get('error') == 'invalid_grant':
+        return False
+
     access_token = response.get('access_token')
     token_type = response.get('token_type')
     expires_in = response.get('expires_in')
 
     # user is logged out
-    # if expires_in == None:
-    #     print("not logged in")
-    #     return
+    if expires_in == None:
+        return False
 
     update_or_create_user_tokens(
         session_id,
@@ -73,6 +80,7 @@ def refresh_spotify_token(session_id):
         token_type,
         expires_in,
         refresh_token)
+    return True
 
 
 def execute_spotify_api_request(session_id, endpoint, post_=False, put_=False):

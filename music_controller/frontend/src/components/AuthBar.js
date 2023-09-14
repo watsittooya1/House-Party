@@ -15,7 +15,6 @@ export default function AuthBar(props) {
         fetch('/spotify/get-user-name')
             .then((response) => response.json())
             .then((data) => {
-                console.log(`USERNAME!: ${data.username}`);
                 setUserName(data.username);
             })
     }
@@ -25,6 +24,7 @@ export default function AuthBar(props) {
         fetch(`/spotify/get-auth-url?show-dialog=${true}`)
             .then((response) => response.json())
             .then((data) => {
+                console.log(data.url);
                 window.location.replace(data.url);
                 });
     }

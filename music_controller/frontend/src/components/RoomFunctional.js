@@ -75,7 +75,7 @@ export default function RoomFunctional(props) {
     }
 
     function renderQueueSearch() {
-        return (<QueueMenu closeMenuCallback={()=>setShowQueueSearch(false)}/>);
+        return (<QueueMenu closeMenuCallback={()=>setShowQueueSearch(false)} isAuthenticated={spotifyAuthenticated}/>);
     }
 
     function getRoomDetails() {
@@ -118,13 +118,14 @@ export default function RoomFunctional(props) {
             .then((response) => response.json())
             .then((data) => {
                 setSpotifyAuthenticated(data.status);
-                if (!data.status) {
-                    fetch('/spotify/get-auth-url')
-                        .then((response) => response.json())
-                        .then((data) => {
-                            window.location.replace(data.url);
-                        });
-                } else {
+                // if (!data.status) {
+                //     fetch('/spotify/get-auth-url')
+                //         .then((response) => response.json())
+                //         .then((data) => {
+                //             window.location.replace(data.url);
+                //         });
+                // } else {
+                if (data.status === true) {
                     // set auth token for web playback controller
                     fetch('/spotify/get-auth-token')
                         .then((response) => {

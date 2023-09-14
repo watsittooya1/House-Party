@@ -39,12 +39,6 @@ export default function Info(props) {
         + " the playback and queue.";
     }
 
-    useEffect(() => {
-        console.log("ran");
-        // below runs on unmount
-        return () => console.log("cleanup");
-    });
-
     function renderInfo() {
 
         let pageToRender;

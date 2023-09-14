@@ -34,7 +34,7 @@ export default function WebPlayback(props) {
             });
 
             player.addListener('authentication_error', ({ message }) => {
-                console.error(message);
+                console.error(`${message} Ignore this error if web playback works!`);
             });
 
             player.addListener('account_error', ({ message }) => {

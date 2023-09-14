@@ -100,7 +100,7 @@ export default function MusicPlayerFunctional(props) {
             <Typography component="h5" variant="h5">
               Nothing playing!
             </Typography>
-            <Typography color="textSecondary" variant="subtitle1">
+            <Typography color="textSecondary" variant="subtitle1" sx={{mx:2}}>
               Log in, then queue up a song to start up the music controller.
             </Typography>
             <div>

@@ -25,7 +25,12 @@ export default function RoomJoinPageFunctional(props) {
                     setError("Room not found");
                 }
             })
-            .catch((error) => {console.log(error)});
+            .catch((err) => {console.log(err)});
+    }
+
+    function changeRoomCodeQuery(e) {
+        setError("");
+        setRoomCode(e.target.value);
     }
 
     return (
@@ -36,15 +41,20 @@ export default function RoomJoinPageFunctional(props) {
                 </Typography>
             </Grid>
             <Grid item xs={12} align="center">
-                <TextField
-                    error={ error }
-                    label="Code"
-                    placeholder="Enter a Room Code"
-                    value={ roomCode }
-                    helperText= { error }
-                    variant="outlined"
-                    onChange={(e) => setRoomCode(e.target.value)}
-                    />
+                { (error === ""
+                        ? <TextField
+                            label="Room Code"
+                            value={ roomCode }
+                            variant="outlined"
+                            onChange={changeRoomCodeQuery} />
+                        : <TextField
+                            error
+                            label="Room Code"
+                            value={ roomCode }
+                            helperText= { error }
+                            variant="outlined"
+                            onChange={changeRoomCodeQuery} />
+                    )}
             </Grid>
             <Grid item xs={12} align="center">
                 <Button variant="contained" color="primary" onClick={roomButtonPressed}>

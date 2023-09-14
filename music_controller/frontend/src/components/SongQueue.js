@@ -40,13 +40,15 @@ export default function SongQueue(props) {
         await fetch('/api/user-in-room')
             .then((response) => response.json())
             .then(async (data) => {
-                if (data.code && isAuthenticated) {
+                if (data.code) {
                     setHidden(false);
-                    await fetch('/spotify/get-queue')
-                        .then((response) => response.json())
-                        .then((data) => {
-                            setQueue(data);
-                        });
+                    if (isAuthenticated) {
+                        await fetch('/spotify/get-queue')
+                            .then((response) => response.json())
+                            .then((data) => {
+                                setQueue(data);
+                            });
+                        }
                 } else {
                     setHidden(true);
                 }

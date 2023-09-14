@@ -31,14 +31,23 @@ export default function QueueMenu(props) {
     const [selectedTrackUri, setSelectedTrackUri] = useState("");
     const [_successMsg, setSuccessMsg] = useState("");
     const [_errorMsg, setErrorMsg] = useState("");
+    const [isAuthenticated, setIsAuthenticated] = useState(props.isAuthenticated);
 
     const closeMenuCallback = props.closeMenuCallback;
+
+    useEffect(() => {
+        setIsAuthenticated(props.isAuthenticated);
+    });
 
     function changeTrackQuery(e) {
         setSearchError("");
         setTrackQuery(e.target.value);
     }
     function executeTrackSearch() {
+        if (!isAuthenticated) {
+            setSearchError("Must be logged in.");
+            return;
+        }
         if (trackQuery === "") {
             setSearchError("Enter a search query.");
             return;
