@@ -93,9 +93,8 @@ export default function RoomFunctional(props) {
                 setGuestCanPause(data.guest_can_pause);
                 setGuestCanQueue(data.guest_can_queue);
                 setIsHost(data.is_host);
-                if (data.is_host) {
-                    authenticateSpotify();
-                }
+                authenticateSpotify();
+                
             });
 
 
@@ -114,20 +113,14 @@ export default function RoomFunctional(props) {
     }
 
     function authenticateSpotify() {
-        fetch('/spotify/is-authenticated')
+        const url = `/spotify/is-authenticated?host=${isHost}` 
+        fetch(url)
             .then((response) => response.json())
             .then((data) => {
                 setSpotifyAuthenticated(data.status);
-                // if (!data.status) {
-                //     fetch('/spotify/get-auth-url')
-                //         .then((response) => response.json())
-                //         .then((data) => {
-                //             window.location.replace(data.url);
-                //         });
-                // } else {
                 if (data.status === true) {
                     // set auth token for web playback controller
-                    fetch('/spotify/get-auth-token')
+                    fetch(`/spotify/get-auth-token?host=${isHost}`)
                         .then((response) => {
                             if (response.ok) {
                                 return response.json();

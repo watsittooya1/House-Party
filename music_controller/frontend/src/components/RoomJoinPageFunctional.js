@@ -14,13 +14,13 @@ export default function RoomJoinPageFunctional(props) {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
             body: JSON.stringify({
-                code: roomCode
+                code: roomCode.toUpperCase(),
             })
         };
         fetch('/api/join-room', requestOptions)
             .then((response) => {
                 if (response.ok) {
-                    history.push(`/room/${roomCode}`)
+                    history.push(`/room/${roomCode.toUpperCase()}`)
                 } else {
                     setError("Room not found");
                 }

@@ -43,9 +43,10 @@ export default function QueueMenu(props) {
         setSearchError("");
         setTrackQuery(e.target.value);
     }
+
     function executeTrackSearch() {
         if (!isAuthenticated) {
-            setSearchError("Must be logged in.");
+            setSearchError("Host must be logged in.");
             return;
         }
         if (trackQuery === "") {

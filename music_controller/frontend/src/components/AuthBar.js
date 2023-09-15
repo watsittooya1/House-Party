@@ -24,7 +24,6 @@ export default function AuthBar(props) {
         fetch(`/spotify/get-auth-url?show-dialog=${true}`)
             .then((response) => response.json())
             .then((data) => {
-                console.log(data.url);
                 window.location.replace(data.url);
                 });
     }

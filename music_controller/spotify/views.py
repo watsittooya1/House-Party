@@ -28,13 +28,25 @@ class AuthURL(APIView):
 
 class GetAuthToken(APIView):
     def get(self, request, format=None):
+        is_host = (request.GET.get('host') == 'true')
+        if is_host:
+            host = self.request.session.session_key
+        else:
+            room_code = self.request.session.get('room_code')
+            room = Room.objects.filter(code=room_code)
+            if room.exists():
+                room = room[0]
+            else:
+                return Response({}, status=status.HTTP_404_NOT_FOUND)
+            host = room.host
         if not request.session.exists(request.session.session_key):
             request.session.create()
 
-        token = get_user_tokens(request.session.session_key)
+        token = get_user_tokens(host)
         if token == None:
             return Response({}, status=status.HTTP_401_UNAUTHORIZED)
         return Response({'token':token.access_token}, status=status.HTTP_200_OK)
+
 
 
 # request for access/refresh token
@@ -75,9 +87,19 @@ def spotify_callback(request, format=None):
 
 
 class IsAuthenticated(APIView):
-
-    def get(self, request, format=None): 
-        is_authenticated = is_spotify_authenticated(self.request.session.session_key)
+    def get(self, request, format=None):
+        is_host = (request.GET.get('host') == 'true')
+        if is_host:
+            host = self.request.session.session_key
+        else:
+            room_code = self.request.session.get('room_code')
+            room = Room.objects.filter(code=room_code)
+            if room.exists():
+                room = room[0]
+            else:
+                return Response({}, status=status.HTTP_404_NOT_FOUND)
+            host = room.host
+        is_authenticated = is_spotify_authenticated(host)
         return Response({
             'status': is_authenticated
         }, status=status.HTTP_200_OK)
@@ -165,6 +187,10 @@ class SkipSong(APIView):
         votes = Vote.objects.filter(room=room, song_id=room.current_song)
         votes_needed = room.votes_to_skip
 
+        # if user has already voted
+        if len(votes.filter(user=self.request.session.session_key)) > 0:
+            return Response({}, status=status.HTTP_403_FORBIDDEN)
+        
         if self.request.session.session_key == room.host or len(votes) + 1 >= votes_needed:
             votes.delete()
             skip_song(room.host)
@@ -238,6 +264,6 @@ class GetUserName(APIView):
         res = get_user_name(request.session.session_key)
         
         if res == None:
-            return Response({"username":""}, status=status.HTTP_204_NO_CONTENT)
+            return Response({"username":""}, status=status.HTTP_200_OK)
 
         return Response({"username":res.get('display_name')}, status=status.HTTP_200_OK)

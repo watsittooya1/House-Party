@@ -14,10 +14,8 @@ export default function SongQueue(props) {
  
     const [hidden, setHidden] = useState(true);
     const [queue, setQueue] = useState([]);
-    const [isAuthenticated, setIsAuthenticated] = useState(false);
 
     useEffect(() => {
-        checkAuthentication();
         checkQueue();
     }, []);
 
@@ -26,15 +24,6 @@ export default function SongQueue(props) {
         return (() => clearInterval(interval));
     });
 
-    function checkAuthentication() {
-        fetch('/spotify/is-authenticated')
-        .then((response) => response.json())
-        .then((data) => {
-            setIsAuthenticated(data.status);
-            }
-        )
-    }
-
     async function checkQueue() {
         // ensure response is OK
         await fetch('/api/user-in-room')
@@ -42,13 +31,17 @@ export default function SongQueue(props) {
             .then(async (data) => {
                 if (data.code) {
                     setHidden(false);
-                    if (isAuthenticated) {
-                        await fetch('/spotify/get-queue')
-                            .then((response) => response.json())
-                            .then((data) => {
-                                setQueue(data);
-                            });
-                        }
+                    await fetch('/spotify/get-queue')
+                        .then((response) => {
+                            if (!response.ok || response.status === 204) {
+                                return [];
+                            }
+                            return response.json();
+                        })
+                        .then((data) => {
+                            setQueue(data);
+                        });
+                        
                 } else {
                     setHidden(true);
                 }
