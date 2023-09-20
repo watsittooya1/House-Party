@@ -1,8 +1,4 @@
-import React, { useState, useEffect } from 'react';
-
 export default function WebPlayback(props) {
-
-    const [_player, setPlayer] = useState(undefined);
 
     useEffect(() => {
         const script = document.createElement("script");
@@ -10,7 +6,7 @@ export default function WebPlayback(props) {
         script.async = true;
     
         document.body.appendChild(script);
-    
+
         window.onSpotifyWebPlaybackSDKReady = () => {
     
             const player = new window.Spotify.Player({
@@ -18,11 +14,11 @@ export default function WebPlayback(props) {
                 getOAuthToken: cb => { cb(props.token); },
                 volume: 0.5
             });
-    
-            setPlayer(player);
+
+            window.SpotifyPlayer = player;
     
             player.addListener('ready', ({ device_id }) => {
-                console.log('Ready with Device ID', device_id);
+                console.log('Web playback ready with Device ID', device_id);
             });
     
             player.addListener('not_ready', ({ device_id }) => {
@@ -49,9 +45,8 @@ export default function WebPlayback(props) {
             player.connect();
         };
         return (()=>{
-            if (_player) {
-                _player.disconnect();
-            }});
+            window.SpotifyPlayer.disconnect();
+        });
     }, []); 
 
    return (

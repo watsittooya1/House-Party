@@ -27,6 +27,7 @@ export default function RoomFunctional(props) {
 
     useEffect(() => {
         getRoomDetails();
+        return (()=>{console.log("room destroyed");});
     }, []);
 
     function renderSettingsButton() {

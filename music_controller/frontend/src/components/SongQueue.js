@@ -60,7 +60,8 @@ export default function SongQueue(props) {
             }}>
                 {queue
                     ? queue.map((song)=>(
-                        <div key={song.id}>
+                        // gives a random string suffix to song id, to prevent duplicate key id
+                        <div key={`${song.id}_randomstring-${(Math.random() + 1).toString(36).substring(4)}`}>
                             <ListItem sx={{pl:0}}>
                                 <ListItemAvatar height="100%">
                                     <img src={song.image.url} width="50"/>
