@@ -112,7 +112,7 @@ class CurrentSong(APIView):
         if room.exists():
             room = room[0]
         else:
-            return Response({}, status=status.HTTP_404_NOT_FOUND)
+            return Response({}, status=status.HTTP_205_RESET_CONTENT)
         host = room.host
         endpoint = "player/currently-playing"
         response = execute_spotify_api_request(host, endpoint)
@@ -204,7 +204,11 @@ class SkipSong(APIView):
 class GetQueue(APIView):
     def get(self, request, format=None):
         room_code = self.request.session.get('room_code')
-        room = Room.objects.filter(code=room_code)[0]
+        room = Room.objects.filter(code=room_code)
+        if room.exists():
+            room = room[0]
+        else:
+            return Response({}, status=status.HTTP_205_RESET_CONTENT)
 
         res = get_queue(room.host)
         songs = []

@@ -27,7 +27,6 @@ export default function RoomFunctional(props) {
 
     useEffect(() => {
         getRoomDetails();
-        return (()=>{console.log("room destroyed");});
     }, []);
 
     function renderSettingsButton() {
@@ -148,7 +147,7 @@ export default function RoomFunctional(props) {
                     }
                 </Grid>
                 <Grid item xs={12} align="center">
-                    <MusicPlayerFunctional />
+                    <MusicPlayerFunctional leaveRoomCallback={props.leaveRoomCallback}/>
                 </Grid>
                 <Grid item xs={12} align="center">
                     <Grid container spacing={1} justifyContent="center">
@@ -166,7 +165,7 @@ export default function RoomFunctional(props) {
 
     return (
         <div className="room">
-            { token
+            { (token && isHost)
             ? <WebPlayback token={token}/>
             : null }
             { showSettings

@@ -1,3 +1,5 @@
+import React, { useEffect } from 'react';
+
 export default function WebPlayback(props) {
 
     useEffect(() => {
@@ -46,6 +48,7 @@ export default function WebPlayback(props) {
         };
         return (()=>{
             window.SpotifyPlayer.disconnect();
+            window.SpotifyPlayer = null;
         });
     }, []); 
 

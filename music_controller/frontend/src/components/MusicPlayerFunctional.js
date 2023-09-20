@@ -6,6 +6,7 @@ import {
   IconButton,
   LinearProgress,
 } from "@mui/material";
+import { useHistory } from "react-router-dom";
 import PlayArrowIcon from "@mui/icons-material/playArrow";
 import SkipNextIcon from "@mui/icons-material/skipNext";
 import PauseIcon from "@mui/icons-material/pause";
@@ -14,6 +15,7 @@ export default function MusicPlayerFunctional(props) {
 
   const [song, setSong] = useState({});
   const [songProgress, setSongProgress] = useState(0);
+  const history = useHistory();
 
   useEffect(() => {
     getMusicPlayerInfo();
@@ -41,7 +43,18 @@ export default function MusicPlayerFunctional(props) {
   async function getCurrentSong() {
     await fetch("/spotify/current-song")
       .then((response) => {
-        if (!response.ok || response.status === 204) {
+        if (response.status == 205) {
+          // room doesn't exist
+          const requestOptions = {
+            method: "POST",
+            headers: {"Content-Type": "application/json"},
+          };
+          fetch('/api/leave-room', requestOptions)
+            .then((_response) => {
+              props.leaveRoomCallback();
+              history.push('/');
+          });
+        } else if (!response.ok || response.status === 204) {
           return {};
         } else {
           return response.json();

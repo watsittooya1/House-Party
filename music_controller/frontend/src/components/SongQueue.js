@@ -33,7 +33,9 @@ export default function SongQueue(props) {
                     setHidden(false);
                     await fetch('/spotify/get-queue')
                         .then((response) => {
-                            if (!response.ok || response.status === 204) {
+                            if (response.status == 205) {
+                                return [];
+                            } else if (!response.ok || response.status === 204) {
                                 return [];
                             }
                             return response.json();
