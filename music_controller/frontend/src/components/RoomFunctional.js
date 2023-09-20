@@ -166,7 +166,7 @@ export default function RoomFunctional(props) {
     return (
         <div className="room">
             { (token && isHost)
-            ? <WebPlayback token={token}/>
+            ? <WebPlayback token={token} playbackInitCallback={props.playbackInitCallback} playbackInit={props.playbackInit} />
             : null }
             { showSettings
                 ? renderSettings()

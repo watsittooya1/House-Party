@@ -20,6 +20,7 @@ import RoomFunctional from "./RoomFunctional";
 export default function HomePageFunctional(props) {
 
     const [roomCode, setRoomCode] = useState(null);
+    const [playbackInit, setPlaybackInit] = useState(false);
 
     useEffect(() => {
         fetch('/api/user-in-room')
@@ -65,6 +66,8 @@ export default function HomePageFunctional(props) {
         );
     }
 
+
+
     return (
         <Router>
             <Switch>
@@ -82,7 +85,11 @@ export default function HomePageFunctional(props) {
                 <Route
                     path="/room/:roomCode"
                     render={(props) => {
-                        return <RoomFunctional {...props} leaveRoomCallback={clearRoomCode}/>
+                        return <RoomFunctional
+                            {...props}
+                            leaveRoomCallback={clearRoomCode}
+                            playbackInitCallback={()=>{setPlaybackInit(true);}}
+                            playbackInit={playbackInit}/>
                     }}/>
             </Switch>
         </Router>
