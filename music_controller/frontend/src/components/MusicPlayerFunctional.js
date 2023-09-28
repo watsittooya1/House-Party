@@ -7,9 +7,9 @@ import {
   LinearProgress,
 } from "@mui/material";
 import { useHistory } from "react-router-dom";
-import PlayArrowIcon from "@mui/icons-material/playArrow";
-import SkipNextIcon from "@mui/icons-material/skipNext";
-import PauseIcon from "@mui/icons-material/pause";
+import PlayArrowIcon from "@mui/icons-material/PlayArrow";
+import SkipNextIcon from "@mui/icons-material/SkipNext";
+import PauseIcon from "@mui/icons-material/Pause";
 
 export default function MusicPlayerFunctional(props) {
 
