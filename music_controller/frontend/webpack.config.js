@@ -5,6 +5,7 @@ module.exports = {
   entry: "./src/index.js",
   output: {
     path: path.resolve(__dirname, "./static/frontend"),
+    publicPath: "/static/",
     filename: "[name].js",
   },
   module: {
