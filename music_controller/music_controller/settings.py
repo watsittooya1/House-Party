@@ -26,7 +26,7 @@ SECRET_KEY = '***REMOVED***'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['127.0.0.1', '10.0.0.21', '142.93.184.143']
+ALLOWED_HOSTS = ['127.0.0.1', '10.0.0.21', '142.93.184.143', 'house-party.social', 'localhost']
 
 
 # Application definition
