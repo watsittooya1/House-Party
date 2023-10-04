@@ -209,8 +209,12 @@ class GetQueue(APIView):
             room = room[0]
         else:
             return Response({}, status=status.HTTP_205_RESET_CONTENT)
-
+    
         res = get_queue(room.host)
+        
+        if 'queue' not in res:
+            return Response({}, status=status.HTTP_204_NO_CONTENT)
+        
         songs = []
         for item in res.get("queue"):
             song = {
