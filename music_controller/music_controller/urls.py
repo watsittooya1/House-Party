@@ -16,10 +16,12 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
+from .gsc_verif import gsc_verif_index
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/', include('api.urls')),
     path('', include('frontend.urls')),
     path('spotify/', include('spotify.urls')),
+    path('google8725c32bef7fb570.html', gsc_verif_index)
 ]
