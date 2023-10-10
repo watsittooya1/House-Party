@@ -114,14 +114,15 @@ export default function MusicPlayerFunctional(props) {
               Nothing playing!
             </Typography>
             <Typography color="textSecondary" variant="subtitle1" sx={{mx:2}}>
-              Log in, then queue up a song to start up the music controller.
+              Log in, then press play to transfer playback to this site.
             </Typography>
             <div>
-              <IconButton>
-                <PauseIcon />
-              </IconButton>
-              <IconButton>
-                <SkipNextIcon />
+              <IconButton
+                onClick={() => {
+                  playSong();
+                }}
+              >
+                <PlayArrowIcon />
               </IconButton>
             </div>
           </Grid>

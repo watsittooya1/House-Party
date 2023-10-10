@@ -83,7 +83,7 @@ def refresh_spotify_token(session_id):
     return True
 
 
-def execute_spotify_api_request(session_id, endpoint, post_=False, put_=False):
+def execute_spotify_api_request(session_id, endpoint, json_=None, post_=False, put_=False):
     tokens = get_user_tokens(session_id)
     if not tokens:
         return {'Error':'not logged in'}
@@ -92,9 +92,9 @@ def execute_spotify_api_request(session_id, endpoint, post_=False, put_=False):
         'Authorization': 'Bearer ' + tokens.access_token
     }
     if post_:
-        response = post(BASE_URL + endpoint, headers=headers)
+        response = post(BASE_URL + endpoint, json=json_, headers=headers)
     elif put_:
-        response = put(BASE_URL + endpoint, headers=headers)
+        response = put(BASE_URL + endpoint, json=json_, headers=headers)
     else:
         response = get(BASE_URL + endpoint, {}, headers=headers)
     try:
@@ -149,3 +149,10 @@ def get_user_name(session_id):
     except Exception as e:
         return {'Error': f'issue with request, {e}'}
 
+def switch_to_sdk(session_id):
+    res = execute_spotify_api_request(session_id, 'player/devices')
+    sdk = list(filter(lambda item: item['name'] == "Web Playback SDK", res['devices']))[0]
+    if not sdk:
+        return {'Error': 'Web Playback SDK not found'}
+    body = {'device_ids': [sdk['id']]}
+    return execute_spotify_api_request(session_id, 'player', json_=body, put_=True)

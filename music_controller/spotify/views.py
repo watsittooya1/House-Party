@@ -174,9 +174,13 @@ class PlaySong(APIView):
         room_code = self.request.session.get('room_code')
         room = Room.objects.filter(code=room_code)[0]
         if self.request.session.session_key == room.host or room.guest_can_pause:
-            play_song(room.host)
-            return Response({}, status=status.HTTP_204_NO_CONTENT)
 
+            res = play_song(room.host)
+            if res != None and 'error' in res and res['error']['reason'] == 'NO_ACTIVE_DEVICE':
+                switch_to_sdk(room.host)
+
+            return Response({}, status=status.HTTP_200_OK)
+        
         return Response({}, status=status.HTTP_403_FORBIDDEN)
 
 class SkipSong(APIView):
