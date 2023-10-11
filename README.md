@@ -1,9 +1,9 @@
 House Party
 
 House Party is a web app that allows users to join and host common Spotify radio rooms, using only one premium account! Users can control audio playback, add songs to queue, skip songs, and even play audio from the browser.
+The deployed site can be found at https://house-party.social
 
-![image](https://github.com/watsittooya1/django-react-tutorial/assets/57497072/34844479-86bc-4281-b30f-ff2ee9ff510d)
-
+![housepartypreview](https://github.com/watsittooya1/House-Party/assets/57497072/0a998689-f6a9-4e3b-9fda-2bdf09ca3e1a)
 
 This project started out as a tutorial for me to deepen my understanding of Django and React, but turned into a full-fledged deployment as I explored different possibilities and technologies.
 
