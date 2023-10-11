@@ -6,6 +6,7 @@ import { Link } from "react-router-dom";
 
 
 const pages = {
+    NOTE: "pages.note",
     ABOUT: "pages.about",
     JOIN: "pages.join",
     CREATE: "pages.create",
@@ -14,10 +15,18 @@ const pages = {
 
 export default function Info(props) {
 
-    const [page, setPage] = useState(pages.ABOUT);
+    const [page, setPage] = useState(pages.NOTE);
 
+    function noteInfo() {
+        return "(NOTE: This app is in development mode, and as per Spotify's terms, cannot be moved into"
+        + " extended quota mode as it is a hobby project. As a result, you unfortunately won't be able to"
+        + " host a room without me (Chris Yun) having adding your email to the app whitelist. If you're a "
+        + "recruiter, I'd be happy to do so do show you the app's functionality!)";
+    }
+    
     function aboutInfo() {
-        return "House Party is a web-app made to allow you and your friends to create a shared radio"
+        return "House Party is a "
+        + "web-app made to allow you and your friends to create a shared radio"
         + " using only one Spotify premium account! If you didn't know already, Spotify's own 'Shared"
         + " Radio' feature is known to be buggy and unaccomodating at times. Thus House Party can be "
         + "your readily available substitute."
@@ -43,6 +52,9 @@ export default function Info(props) {
 
         let pageToRender;
         switch (page) {
+            case pages.NOTE:
+                pageToRender = noteInfo();
+                break;
             case pages.ABOUT:
                 pageToRender = aboutInfo();
                 break;
@@ -67,9 +79,9 @@ export default function Info(props) {
     }
 
     function renderButtons() {
-        const sequence = [pages.ABOUT, pages.CREATE, pages.JOIN, pages.EXTRA]
+        const sequence = [pages.NOTE, pages.ABOUT, pages.CREATE, pages.JOIN, pages.EXTRA]
         const currentPage = sequence.indexOf(page);
-        const prevPage = sequence[(currentPage + 3) % (sequence.length)]
+        const prevPage = sequence[(currentPage + (sequence.length - 1)) % (sequence.length)]
         const nextPage = sequence[(currentPage + 1) % (sequence.length)]
 
         return (
