@@ -1,2 +1,7 @@
 *.pyc
 *.sqlite3
+
+music_controller/db.sqlite3
+music_controller/music_controller/secret.py
+music_controller/spotify/credentials.py
+
