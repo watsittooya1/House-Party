@@ -1,4 +1,4 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import redirect
 from .credentials import REDIRECT_URI, CLIENT_SECRET, CLIENT_ID
 from rest_framework.views import APIView
 from requests import Request, post
@@ -7,11 +7,12 @@ from rest_framework.response import Response
 from .util import *
 from api.models import Room
 from .models import Vote
+import requests
 
 
 # request auth from Spotify
-class AuthURL(APIView):
-    def get(self, request, format=None):
+class AuthUrlView(APIView):
+    def get(self, request):
         # found from Spotify API documentation
         show_dialog = False or request.GET.get('show-dialog')
         scopes = 'streaming user-read-playback-state user-modify-playback-state user-read-currently-playing'
@@ -26,18 +27,19 @@ class AuthURL(APIView):
         return Response({'url': url}, status=status.HTTP_200_OK)
 
 
-class GetAuthToken(APIView):
-    def get(self, request, format=None):
+class AuthTokenView(APIView):
+    def get(self, request):
         is_host = (request.GET.get('host') == 'true')
         if is_host:
             host = self.request.session.session_key
         else:
             room_code = self.request.session.get('room_code')
             room = Room.objects.filter(code=room_code)
-            if room.exists():
-                room = room[0]
-            else:
-                return Response({}, status=status.HTTP_404_NOT_FOUND)
+            
+            if not room.exists():
+                return Response({'Not Found': 'Room not found'}, status=status.HTTP_404_NOT_FOUND)
+            
+            room = room[0]    
             host = room.host
         if not request.session.exists(request.session.session_key):
             request.session.create()
@@ -45,12 +47,13 @@ class GetAuthToken(APIView):
         token = get_user_tokens(host)
         if token == None:
             return Response({}, status=status.HTTP_401_UNAUTHORIZED)
+        
         return Response({'token':token.access_token}, status=status.HTTP_200_OK)
 
 
 
 # request for access/refresh token
-def spotify_callback(request, format=None):
+def spotify_callback(request):
     code = request.GET.get('code')
     error = request.GET.get('error')
 
@@ -87,7 +90,7 @@ def spotify_callback(request, format=None):
 
 
 class IsAuthenticated(APIView):
-    def get(self, request, format=None):
+    def get(self, request):
         is_host = (request.GET.get('host') == 'true')
         if is_host:
             host = self.request.session.session_key
@@ -104,27 +107,20 @@ class IsAuthenticated(APIView):
             'status': is_authenticated
         }, status=status.HTTP_200_OK)
 
-class CurrentSong(APIView):
-    
-    def get(self, request, format=None):
+
+class CurrentSongView(APIView):
+    def get(self):
         room_code = self.request.session.get('room_code')
         room = Room.objects.filter(code=room_code)
-        if room.exists():
-            room = room[0]
-        else:
-            return Response({}, status=status.HTTP_205_RESET_CONTENT)
-        host = room.host
-        endpoint = "player/currently-playing"
-        response = execute_spotify_api_request(host, endpoint)
-
-        if response == None or 'error' in response or 'item' not in response:
-            return Response({}, status=status.HTTP_204_NO_CONTENT)
+        if not room_code or not room.exists():
+            return Response({'Precondition Failed': 'User is not in a room'}, status=status.HTTP_412_PRECONDITION_FAILED)
+            
+        room = room[0]
+        # we pass the sessionId of the host to get room info
+        headers = prepare_headers(room.host)
+        response = requests.get(SPOTIFY_BASE_URL + "player/currently-playing", headers=headers).json()
         
         item = response.get('item')
-        duration = item.get('duration_ms')
-        progress = response.get('progress_ms')
-        album_cover = item.get('album').get('images')[0].get('url')
-        is_playing = response.get('is_playing')
         song_id = item.get('id')
         artist_string = ""
         for i, artist in enumerate(item.get('artists')):
@@ -134,148 +130,175 @@ class CurrentSong(APIView):
             artist_string += name
 
         votes = len(Vote.objects.filter(room=room, song_id=song_id))
+        # cy TODO: how many of these fields are necessary?
         song = {
             'title': item.get('name'),
             'artist': artist_string,
-            'duration': duration,
-            'time': progress,
-            'image_url': album_cover,
-            'is_playing': is_playing,
+            'duration': item.get('duration_ms'),
+            'time': response.get('progress_ms'),
+            'image_url': item.get('album').get('images')[0].get('url'),
+            'is_playing': response.get('is_playing'),
             'votes': votes,
             'votes_required': room.votes_to_skip,
             'id': song_id
         }
 
-        self.update_room_song(room, song_id)
+        if room.current_song != song_id:
+            room.current_song = song_id
+            room.save(update_fields=['current_song'])
+            votes = Vote.objects.filter(room=room).delete()
 
         return Response(song, status=status.HTTP_200_OK)
     
 
-    def update_room_song(self, room, song_id):
-        current_song = room.current_song
-        if current_song != song_id:
-            room.current_song = song_id
-            room.save(update_fields=['current_song'])
-            votes = Vote.objects.filter(room=room).delete()
-    
-
-class PauseSong(APIView):
-    def put(self, response, format=None):
+class PauseSongView(APIView):
+    def put(self):
         room_code = self.request.session.get('room_code')
         room = Room.objects.filter(code=room_code)[0]
-        if self.request.session.session_key == room.host or room.guest_can_pause:
-            pause_song(room.host)
-            return Response({}, status=status.HTTP_204_NO_CONTENT)
-
-        return Response({}, status=status.HTTP_403_FORBIDDEN)
-    
-class PlaySong(APIView):
-    def put(self, response, format=None):
-        room_code = self.request.session.get('room_code')
-        room = Room.objects.filter(code=room_code)[0]
-        if self.request.session.session_key == room.host or room.guest_can_pause:
-
-            res = play_song(room.host)
-            if res != None and 'error' in res and res['error']['reason'] == 'NO_ACTIVE_DEVICE':
-                switch_to_sdk(room.host)
-
-            return Response({}, status=status.HTTP_200_OK)
         
-        return Response({}, status=status.HTTP_403_FORBIDDEN)
-
-class SkipSong(APIView):
-    def post(self, request, format=None):
+        if not room_code or not room.exists():
+            return Response({'Precondition Failed': 'User is not in a room'}, status=status.HTTP_412_PRECONDITION_FAILED)
+        
+        if (self.request.session.session_key != room.host and room.guest_can_pause):
+            return Response({'Forbidden': 'You are not authorized to pause the room\'s song'}, status=status.HTTP_403_FORBIDDEN)
+        
+        room = room[0]
+        # we pass the sessionId of the host to get room info
+        headers = prepare_headers(room.host)
+        requests.put(SPOTIFY_BASE_URL + "player/pause", headers=headers)
+        
+        return Response(status=status.HTTP_200_OK)
+    
+    
+class PlaySongView(APIView):
+    def put(self):
         room_code = self.request.session.get('room_code')
         room = Room.objects.filter(code=room_code)[0]
+        
+        if not room_code or not room.exists():
+            return Response({'Precondition Failed': 'User is not in a room'}, status=status.HTTP_412_PRECONDITION_FAILED)
+        
+        if (self.request.session.session_key != room.host and room.guest_can_pause):
+            return Response({'Forbidden': 'You are not authorized to pause the room\'s song'}, status=status.HTTP_403_FORBIDDEN)
+        
+        room = room[0]
+        # we pass the sessionId of the host to get room info
+        headers = prepare_headers(room.host)
+        response = requests.put(SPOTIFY_BASE_URL + "player/play", headers=headers).json()
+
+        # The host is not connected switched to the SDK, so get the SDK id and switch to it
+        if response != None and 'error' in response and response['error']['reason'] == 'NO_ACTIVE_DEVICE':
+            
+            response = requests.get(SPOTIFY_BASE_URL + 'player/devices', headers=headers)
+            
+            sdk = list(filter(lambda item: item['name'] == "Web Playback SDK", response['devices']))[0]
+            requests.put(SPOTIFY_BASE_URL + 'player', headers, json={'device_ids': [sdk['id']]})
+
+        return Response(status=status.HTTP_200_OK)
+
+class SkipSongView(APIView):
+    def post(self):
+        room_code = self.request.session.get('room_code')
+        room = Room.objects.filter(code=room_code)[0]
+
+        if not room_code or not room.exists():
+            return Response({'Precondition Failed': 'User is not in a room'}, status=status.HTTP_412_PRECONDITION_FAILED)
 
         votes = Vote.objects.filter(room=room, song_id=room.current_song)
         votes_needed = room.votes_to_skip
 
         # if user has already voted
-        if len(votes.filter(user=self.request.session.session_key)) > 0:
-            return Response({}, status=status.HTTP_403_FORBIDDEN)
+        if any(v.user == self.request.session.session_key for v in votes):
+            return Response({'Forbidden': 'User has already voted to skip'}, status=status.HTTP_403_FORBIDDEN)
         
         if self.request.session.session_key == room.host or len(votes) + 1 >= votes_needed:
             votes.delete()
-            skip_song(room.host)
+            headers = prepare_headers(room.host)
+            requests.post(SPOTIFY_BASE_URL + "player/play", headers=headers)
         else:
             vote = Vote(user=self.request.session.session_key, room=room, song_id=room.current_song)
             vote.save()
 
-        return Response({}, status=status.HTTP_204_NO_CONTENT)
+        return Response(status=status.HTTP_200_OK)
 
 
-class GetQueue(APIView):
-    def get(self, request, format=None):
+class QueueView(APIView):
+    def get(self):
         room_code = self.request.session.get('room_code')
-        room = Room.objects.filter(code=room_code)
-        if room.exists():
-            room = room[0]
-        else:
-            return Response({}, status=status.HTTP_205_RESET_CONTENT)
+        rooms = Room.objects.filter(code=room_code)
+        if not room_code or not rooms.exists():
+            return Response({'Precondition Failed': 'User is not in a room'}, status=status.HTTP_412_PRECONDITION_FAILED)
     
-        res = get_queue(room.host)
-        
-        if 'queue' not in res:
-            return Response({}, status=status.HTTP_204_NO_CONTENT)
+        headers = prepare_headers(rooms[0].host)
+        response = requests.get(SPOTIFY_BASE_URL + 'player/queue', headers=headers).json()
         
         songs = []
-        for item in res.get("queue"):
-            song = {
+        for item in response.get("queue"):
+            songs.append({
                 "album":item.get("album").get("name"),
                 "image":item.get("album").get("images")[0],
                 "artists":map(lambda a: a.get("name"), item.get("artists")),
                 "name":item.get("name"),
                 "id":item.get("id")
-            }
-            songs.append(song)
+            })
 
         return Response(songs, status=status.HTTP_200_OK)
     
-
-class SearchTrack(APIView):
-    def get(self, request, format=None):
+    def post(self, request):
         room_code = self.request.session.get('room_code')
-        room = Room.objects.filter(code=room_code)[0]
+        rooms = Room.objects.filter(code=room_code)
+        if not room_code or not rooms.exists():
+            return Response({'Precondition Failed': 'User is not in a room'}, status=status.HTTP_412_PRECONDITION_FAILED)
+
+        track_uri = request.GET.get('uri')
+        headers = prepare_headers(rooms[0].host)
+        requests.post(SPOTIFY_BASE_URL + f'player/queue?uri={track_uri}', headers=headers)
+        
+        return Response(status=status.HTTP_200_OK)
+    
+
+class SearchView(APIView):
+    def get(self, request):
+        room_code = self.request.session.get('room_code')
+        rooms = Room.objects.filter(code=room_code)
+        if not room_code or not rooms.exists():
+            return Response({'Precondition Failed': 'User is not in a room'}, status=status.HTTP_412_PRECONDITION_FAILED)
 
         track_query = request.GET.get('track')
-
-        res = search_track(room.host, track_query)
+        headers = prepare_headers(rooms[0].host)
+        endpoint = f'https://api.spotify.com/v1/search/?q={track_query}&type=track'
+        response = requests.get(endpoint, headers=headers).json()
 
         songs = []
-        for item in res.get("tracks").get("items"):
-            song = {
+        for item in response.get("tracks").get("items"):
+            songs.append({
                 "album":item.get("album").get("name"),
                 "image":item.get("album").get("images")[0],
                 "artists":map(lambda a: a.get("name"), item.get("artists")),
                 "name":item.get("name"),
                 "uri":item.get("uri")
-            }
-            songs.append(song)
-
+            })
+            
         return Response(songs, status=status.HTTP_200_OK)
 
 
-class AddToQueue(APIView):
-    def post(self, request, format=None):
-        room_code = self.request.session.get('room_code')
-        room = Room.objects.filter(code=room_code)[0]
-
-        track_uri = request.GET.get('uri')
-        add_to_queue(room.host, track_uri)
-        
-        return Response({}, status=status.HTTP_200_OK)
-
-
-class GetUserName(APIView):
-    def get(self, request, format=None):
+class UsernameView(APIView):
+    def get(self, request):
 
         if not request.session.exists(request.session.session_key):
             request.session.create()
-
-        res = get_user_name(request.session.session_key)
         
-        if res == None:
-            return Response({"username":""}, status=status.HTTP_200_OK)
+        tokens = get_user_tokens(request.session.session_key)
+        
+        if not tokens:
+            return Response({"Unauthorized":"User is not logged into Spotify"}, status=status.HTTP_401_UNAUTHORIZED)
+        
+        headers = {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + tokens.access_token
+        }
+        
+        response = requests.get(SPOTIFY_BASE_URL, {}, headers=headers).json()
 
-        return Response({"username":res.get('display_name')}, status=status.HTTP_200_OK)
+        return Response({"username": response.get('display_name')}, status=status.HTTP_200_OK)
+        

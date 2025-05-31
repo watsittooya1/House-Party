@@ -11,5 +11,4 @@ urlpatterns = [
     path('create', index),
     # Django dynamic url
     path('room/<str:roomCode>', index),
-    path('christest', asdf)
 ]
