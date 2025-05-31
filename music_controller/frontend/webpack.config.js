@@ -2,34 +2,31 @@ const path = require("path");
 const webpack = require("webpack");
 
 module.exports = {
-  entry: "./src/index.js",
+  entry: ["./src/index.js"],
   output: {
     path: path.resolve(__dirname, "./static/frontend"),
     publicPath: "/static/frontend/",
-    filename: "[name].js",
+    filename: "bundle.js",
   },
   module: {
     rules: [
       {
-        test: /\.js$/,
+        test: /\.ts$/,
         exclude: /node_modules/,
         use: {
-          loader: "babel-loader",
+          loader: "ts-loader",
         },
-      },
-      {
-        test: /\.(png|svg|jpg|jpeg|gif)$/i,
-        type: 'asset/resource',
-      },
-      {
-        test: /\.m?js$/,
-        enforce: 'pre',
-        use: ['source-map-loader'],
       },
     ],
   },
+  resolve: {
+    extensions: [".tsx", ".ts", ".js"],
+  },
   optimization: {
     minimize: true,
+  },
+  devServer: {
+    historyApiFallback: true,
   },
   plugins: [
     new webpack.DefinePlugin({
