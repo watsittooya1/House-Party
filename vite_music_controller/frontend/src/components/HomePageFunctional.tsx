@@ -3,7 +3,7 @@ import RoomJoinPageFunctional from "./RoomJoinPageFunctional";
 import CreateRoomPageFunctional from "./CreateRoomPageFunctional";
 import Info from "./Info";
 import { Grid, Button, Typography } from "@mui/material";
-import { BrowserRouter as Router, Route, Link } from "react-router-dom";
+import { BrowserRouter as Router, Route, Link, Routes } from "react-router-dom";
 import RoomFunctional from "./RoomFunctional";
 import styled from "@emotion/styled";
 
@@ -78,40 +78,31 @@ const HomePageFunctional: React.FC = () => {
 
   return (
     <Router>
-      <Switch>
-        {
-          // render here basically means this content will be called
-        }
+      <Routes>
         <Route
-          exact
           path="/"
-          render={() => {
-            return roomCode ? (
+          element={roomCode ? (
               <Redirect to={`/room/${roomCode}`} />
             ) : (
-              renderHomePage()
+              () => renderHomePage()
             );
           }}
         />
-        <Route path="/join" component={RoomJoinPageFunctional} />
-        <Route path="/info" component={Info} />
-        <Route path="/create" component={CreateRoomPageFunctional} />
+        <Route path="/join" element={<RoomJoinPageFunctional />} />
+        <Route path="/info" element={<Info />} />
+        <Route path="/create" element={<CreateRoomPageFunctional />} />
         <Route
           path="/room/:roomCode"
-          render={(props) => {
-            return (
-              <RoomFunctional
-                {...props}
+          element={<RoomFunctional
                 leaveRoomCallback={clearRoomCode}
                 playbackInitCallback={() => {
                   setPlaybackInit(true);
                 }}
                 playbackInit={playbackInit}
               />
-            );
-          }}
+           }
         />
-      </Switch>
+      </Routes>
     </Router>
   );
 };

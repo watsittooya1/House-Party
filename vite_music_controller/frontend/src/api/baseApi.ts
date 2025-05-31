@@ -1,6 +1,6 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 
-export const tagTypes = ["Song", "Token"] as const;
+export const tagTypes = ["Song", "Token", "Room"] as const;
 
 export const baseApi = createApi({
   baseQuery: fetchBaseQuery({
