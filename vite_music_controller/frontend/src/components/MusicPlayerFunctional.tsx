@@ -26,6 +26,7 @@ const MusicPlayerFunctional: React.FC<Props> = ({ leaveRoomCallback }) => {
   const [song, setSong] = useState({});
   const [songProgress, setSongProgress] = useState(0);
   const navigate = useNavigate();
+  const 
 
   useEffect(() => {
     const interval = setInterval(getMusicPlayerInfo, 1000);

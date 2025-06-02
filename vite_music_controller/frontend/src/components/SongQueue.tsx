@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import {
   Typography,
   Card,
@@ -11,6 +11,7 @@ import {
 const SongQueue: React.FC = () => {
   const [hidden, setHidden] = useState(true);
   const [queue, setQueue] = useState([]);
+  const [];
 
   useEffect(() => {
     checkQueue();
@@ -21,7 +22,7 @@ const SongQueue: React.FC = () => {
     return () => clearInterval(interval);
   });
 
-  async function checkQueue() {
+  async function checkQueue2() {
     // ensure response is OK
     await fetch("/api/user-in-room")
       .then((response) => response.json())
