@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import index, asdf
+from .views import index
 
 app_name = 'frontend'
 
@@ -10,5 +10,5 @@ urlpatterns = [
     path('info', index),
     path('create', index),
     # Django dynamic url
-    path('room/<str:roomCode>', index),
+    path('room/<str:roomCode>', index)
 ]
