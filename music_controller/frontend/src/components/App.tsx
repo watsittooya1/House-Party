@@ -6,6 +6,7 @@ import AuthBar from "./AuthBar";
 const App: React.FC = () => {
   return (
     <div>
+      <>Hello chris!</>
       <div className="appbar">
         <AuthBar />
       </div>

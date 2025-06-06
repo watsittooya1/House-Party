@@ -11,6 +11,7 @@ import PlayArrowIcon from "@mui/icons-material/PlayArrow";
 import SkipNextIcon from "@mui/icons-material/SkipNext";
 import PauseIcon from "@mui/icons-material/Pause";
 import styled from "@emotion/styled";
+import type { Song } from "../api/spotifyApiTypes";
 
 const StyledGridItem = styled(Grid)<{ xsWidth?: number }>`
   size: {
@@ -23,7 +24,7 @@ type Props = {
   leaveRoomCallback: () => void;
 };
 const MusicPlayerFunctional: React.FC<Props> = ({ leaveRoomCallback }) => {
-  const [song, setSong] = useState({});
+  const [song, setSong] = useState<Song>();
   const [songProgress, setSongProgress] = useState(0);
   const navigate = useNavigate();
 
@@ -31,15 +32,6 @@ const MusicPlayerFunctional: React.FC<Props> = ({ leaveRoomCallback }) => {
     const interval = setInterval(getMusicPlayerInfo, 1000);
     return () => clearInterval(interval);
   });
-
-  const isEmpty = (obj: object) => {
-    for (const prop in obj) {
-      if (Object.hasOwn(obj, prop)) {
-        return false;
-      }
-    }
-    return true;
-  };
 
   const getCurrentSong = useCallback(async () => {
     await fetch("/spotify/current-song")
@@ -50,7 +42,7 @@ const MusicPlayerFunctional: React.FC<Props> = ({ leaveRoomCallback }) => {
             method: "POST",
             headers: { "Content-Type": "application/json" },
           };
-          fetch("/api/leave-room", requestOptions).then((_response) => {
+          fetch("/api/leave-room", requestOptions).then(() => {
             leaveRoomCallback();
             navigate("/");
           });
@@ -61,13 +53,13 @@ const MusicPlayerFunctional: React.FC<Props> = ({ leaveRoomCallback }) => {
         }
       })
       .then((data) => {
-        setSong(data);
+        setSong(data as Song);
       });
   }, [leaveRoomCallback, navigate]);
 
   const getMusicPlayerInfo = useCallback(async () => {
     await getCurrentSong();
-    setSongProgress((song.time / song.duration) * 100);
+    setSongProgress((song!.time / song!.duration) * 100);
   }, [getCurrentSong, setSongProgress, song]);
 
   useEffect(() => {
@@ -101,7 +93,7 @@ const MusicPlayerFunctional: React.FC<Props> = ({ leaveRoomCallback }) => {
     getMusicPlayerInfo();
   }, [getMusicPlayerInfo]);
 
-  if (isEmpty(song)) {
+  if (song === undefined) {
     return (
       <Card sx={{ width: "100%" }}>
         <Grid container alignItems="center">
@@ -141,44 +133,44 @@ const MusicPlayerFunctional: React.FC<Props> = ({ leaveRoomCallback }) => {
         <LinearProgress variant="determinate" value={0} />
       </Card>
     );
-  } else {
-    return (
-      <Card sx={{ width: "100%" }}>
-        <script src="https://sdk.scdn.co/spotify-player.js"></script>
-        <Grid container alignItems="center">
-          <StyledGridItem xsWidth={4}>
-            <img src={song.image_url} height="100%" width="100%" />
-          </StyledGridItem>
-          <StyledGridItem xsWidth={8}>
-            <Typography component="h5" variant="h5">
-              {song.title}
-            </Typography>
-            <Typography color="textSecondary" variant="subtitle1">
-              {song.artist}
-            </Typography>
-            <div>
-              <IconButton
-                onClick={() => {
-                  song.is_playing ? pauseSong() : playSong();
-                }}
-              >
-                {song.is_playing ? <PauseIcon /> : <PlayArrowIcon />}
-              </IconButton>
-              <IconButton
-                onClick={() => {
-                  skipSong();
-                }}
-              >
-                {song.votes} / {song.votes_required}
-                <SkipNextIcon />
-              </IconButton>
-            </div>
-          </StyledGridItem>
-        </Grid>
-        <LinearProgress variant="determinate" value={songProgress} />
-      </Card>
-    );
   }
+  return (
+    <Card sx={{ width: "100%" }}>
+      <script src="https://sdk.scdn.co/spotify-player.js"></script>
+      <Grid container alignItems="center">
+        <StyledGridItem xsWidth={4}>
+          <img src={song!.image_url} height="100%" width="100%" />
+        </StyledGridItem>
+        <StyledGridItem xsWidth={8}>
+          <Typography component="h5" variant="h5">
+            {song!.title}
+          </Typography>
+          <Typography color="textSecondary" variant="subtitle1">
+            {song!.artist}
+          </Typography>
+          <div>
+            <IconButton
+              onClick={() => {
+                //song!.is_playing ? pauseSong() : playSong();
+                pauseSong();
+              }}
+            >
+              {song!.is_playing ? <PauseIcon /> : <PlayArrowIcon />}
+            </IconButton>
+            <IconButton
+              onClick={() => {
+                skipSong();
+              }}
+            >
+              {song!.votes} / {song!.votes_required}
+              <SkipNextIcon />
+            </IconButton>
+          </div>
+        </StyledGridItem>
+      </Grid>
+      <LinearProgress variant="determinate" value={songProgress} />
+    </Card>
+  );
 };
 
 export default MusicPlayerFunctional;

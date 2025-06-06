@@ -1,0 +1,16 @@
+import styled from "@emotion/styled";
+
+type FlexProps = {
+  direction?: "row" | "column";
+  alignItems?: "flex-end" | "stretch" | "center" | "flex-start";
+  justifyContent?: "start" | "center" | "flex-end" | "space-between";
+  gap?: string;
+};
+
+export const Flex = styled.div<FlexProps>`
+  display: flex;
+  flex-direction: ${({ direction }) => direction ?? "row"};
+  align-items: ${({ alignItems }) => alignItems ?? "flex-start"};
+  justify-content: ${({ justifyContent }) => justifyContent ?? "start"};
+  ${({ gap }) => (gap != null ? `gap: ${gap};` : "")}
+`;

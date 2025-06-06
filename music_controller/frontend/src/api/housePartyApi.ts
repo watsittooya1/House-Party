@@ -1,8 +1,7 @@
 import { baseApi } from "./baseApi";
-import { Room } from "./housePartyApiTypes";
-//import { getQueryString } from "@utils/queryUtility";
+import type { Room } from "./housePartyApiTypes";
 
-export const houesPartyApi = baseApi.injectEndpoints({
+export const housePartyApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     room: builder.query<Room, void>({
       query: () => "/api/room",

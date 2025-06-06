@@ -1,9 +1,7 @@
+/// <reference types="spotify-web-playback-sdk" />
 import { baseApi } from "./baseApi";
-import { QueueSong, SearchSong, Song } from "./spotifyApiTypes";
-//import { getQueryString } from "@utils/queryUtility";
 
 // Define a service using a base URL and expected endpoints
-// cy TODO: transformErrorResponse?
 export const spotifyApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     getAuthUrl: builder.query<{ url: string }, void>({
@@ -25,7 +23,7 @@ export const spotifyApi = baseApi.injectEndpoints({
       query: () => "/spotify/is-authenticated",
       //providesTags: ["Token"],
     }),
-    getCurrentSong: builder.query<Song, void>({
+    getCurrentSong: builder.query<Spotify.Track, void>({
       query: () => "/spotify/current-song",
       providesTags: ["Song"],
     }),
@@ -38,10 +36,10 @@ export const spotifyApi = baseApi.injectEndpoints({
     performSkip: builder.query<void, void>({
       query: () => "/spotify/skip",
     }),
-    getQueue: builder.query<QueueSong[], void>({
+    getQueue: builder.query<Spotify.Track[], void>({
       query: () => "/spotify/get-queue",
     }),
-    searchTrack: builder.query<SearchSong[], void>({
+    searchTrack: builder.query<Spotify.Track[], void>({
       query: () => "/spotify/search-track",
     }),
     addToQueue: builder.query<void, void>({

@@ -1,4 +1,4 @@
-import { ChangeEvent, useCallback, useState } from "react";
+import { type ChangeEvent, useCallback, useState } from "react";
 import {
   Grid,
   Button,
@@ -8,6 +8,7 @@ import {
   Alert,
 } from "@mui/material";
 import styled from "@emotion/styled";
+import { type SearchSong } from "../api/spotifyApiTypes";
 
 type Props = {
   isAuthenticated: boolean;
@@ -30,7 +31,7 @@ const StyledGridItem = styled(Grid)<{ xsWidth?: number }>`
 
 const QueueMenu: React.FC<Props> = ({ isAuthenticated, closeMenuCallback }) => {
   const [trackQuery, setTrackQuery] = useState("");
-  const [trackList, setTrackList] = useState([]);
+  const [trackList, setTrackList] = useState<SearchSong[]>();
   const [searchError, setSearchError] = useState("");
   const [selectedTrackUri, setSelectedTrackUri] = useState("");
   const [_successMsg, setSuccessMsg] = useState("");
@@ -66,13 +67,13 @@ const QueueMenu: React.FC<Props> = ({ isAuthenticated, closeMenuCallback }) => {
 
   const handleTrackSelect = useCallback(
     (songUri: string) => {
-      const trackListCopy = [...trackList];
+      const trackListCopy = [...trackList!];
       for (let i = 0; i < trackListCopy.length; i++) {
         if (trackListCopy[i].uri == songUri) {
-          trackListCopy[i].selected = true;
+          //trackListCopy[i].selected = true;
           setSelectedTrackUri(songUri);
         } else {
-          trackListCopy[i].selected = false;
+          //trackListCopy[i].selected = false;
         }
       }
     },
@@ -140,12 +141,15 @@ const QueueMenu: React.FC<Props> = ({ isAuthenticated, closeMenuCallback }) => {
   }
 
   function renderTrackList() {
+    if (trackList === undefined) {
+      return <></>;
+    }
     return (
       <Grid container alignItems="stretch" spacing={2}>
         {trackList.map((song) => (
           <Grid key={song.uri} size={{ xs: 3 }}>
             <Button
-              variant={song.selected ? "contained" : "outlined"}
+              //variant={song.selected ? "contained" : "outlined"}
               onClick={() => handleTrackSelect(song.uri)}
               sx={{
                 padding: 1,
@@ -157,7 +161,12 @@ const QueueMenu: React.FC<Props> = ({ isAuthenticated, closeMenuCallback }) => {
               }}
             >
               <div>
-                <img src={song.image.url} width="100" />
+                <img
+                  src={
+                    "asdf" //"song.image.url"
+                  }
+                  width="100"
+                />
 
                 <Typography color="textPrimary" variant="subtitle2">
                   {song.name}
@@ -173,7 +182,9 @@ const QueueMenu: React.FC<Props> = ({ isAuthenticated, closeMenuCallback }) => {
     );
   }
 
-  return (
+  return trackList === undefined ? (
+    <></>
+  ) : (
     <div>
       <Grid container spacing={3} sx={{ mb: 10 }} justifyContent="center">
         <StyledGridItem>{renderSearchBar()}</StyledGridItem>

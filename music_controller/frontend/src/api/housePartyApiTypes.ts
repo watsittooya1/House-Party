@@ -1,5 +1,3 @@
-//('id', 'code', 'host', 'guest_can_pause', 'guest_can_queue', 'votes_to_skip', 'created_at')
-
 export type Room = {
   id: string;
   code: string;

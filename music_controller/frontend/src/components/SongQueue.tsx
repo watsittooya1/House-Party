@@ -7,10 +7,11 @@ import {
   ListItem,
   ListItemAvatar,
 } from "@mui/material";
+import { type QueueSong } from "../api/spotifyApiTypes";
 
 const SongQueue: React.FC = () => {
   const [hidden, setHidden] = useState(true);
-  const [queue, setQueue] = useState([]);
+  const [queue, setQueue] = useState<QueueSong[]>();
 
   useEffect(() => {
     checkQueue();
@@ -43,7 +44,7 @@ const SongQueue: React.FC = () => {
               }
             })
             .then((data) => {
-              setQueue(data);
+              setQueue(data as QueueSong[]);
             });
         } else {
           setHidden(true);
@@ -84,7 +85,12 @@ const SongQueue: React.FC = () => {
                 <ListItem sx={{ pl: 0 }}>
                   <ListItemAvatar //height="100%"
                   >
-                    <img src={song.image.url} width="50" />
+                    <img
+                      src={
+                        "asdf" //song.image.url
+                      }
+                      width="50"
+                    />
                   </ListItemAvatar>
                   <div>
                     <Typography component="h6" variant="h6">

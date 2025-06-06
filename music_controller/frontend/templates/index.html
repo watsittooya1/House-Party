@@ -1,21 +1,24 @@
 <!DOCTYPE html>
 <html>
-  <!-- this file differs from the django template in that the template uses static files 
-   to load bundled assets whereas this file loads the modules directly-->
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>House Party!</title>
+    {% load static %}
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <link
       rel="stylesheet"
       href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap"
     />
-    <link rel="shortcut icon" type="image/png" href="/public/favicon.png" />
+    <link
+      rel="shortcut icon"
+      type="image/png"
+      href="{% static "favicon.png" %}"
+    />
   </head>
-  <body style="margin: 0; padding: 0">
+  <body style="margin:0;padding:0">
     <div id="root"></div>
 
-    <script type="module" src="/src/App.tsx"></script>
+    <script src="{% static "bundle.js" %}"></script>
   </body>
 </html>

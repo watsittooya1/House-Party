@@ -1,9 +1,15 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import RoomJoinPageFunctional from "./RoomJoinPageFunctional";
 import CreateRoomPageFunctional from "./CreateRoomPageFunctional";
 import Info from "./Info";
 import { Grid, Button, Typography } from "@mui/material";
-import { BrowserRouter as Router, Route, Link, Routes } from "react-router-dom";
+import {
+  BrowserRouter as Router,
+  Route,
+  Link,
+  Routes,
+  Navigate,
+} from "react-router-dom";
 import RoomFunctional from "./RoomFunctional";
 import styled from "@emotion/styled";
 
@@ -16,7 +22,8 @@ const StyledGridItem = styled(Grid)`
 
 const HomePageFunctional: React.FC = () => {
   const [roomCode, setRoomCode] = useState(null);
-  const [playbackInit, setPlaybackInit] = useState(false);
+  // cy TODO: verify we want false default
+  const [playbackInit, setPlaybackInit] = useState<boolean>(false);
 
   useEffect(() => {
     fetch("/api/user-in-room")
@@ -30,8 +37,8 @@ const HomePageFunctional: React.FC = () => {
     setRoomCode(null);
   }
 
-  function renderHomePage() {
-    return (
+  const homePage = useMemo(
+    () => (
       <Grid container spacing={3}>
         <StyledGridItem>
           <Typography variant="h3" component="h3">
@@ -73,34 +80,48 @@ const HomePageFunctional: React.FC = () => {
           </Grid>
         </StyledGridItem>
       </Grid>
-    );
-  }
+    ),
+    []
+  );
 
+  const asdf = true;
+  if (asdf) {
+    return <>Hello world!</>;
+  }
   return (
     <Router>
       <Routes>
         <Route
           path="/"
-          element={roomCode ? (
-              <Redirect to={`/room/${roomCode}`} />
-            ) : (
-              () => renderHomePage()
-            );
-          }}
+          element={roomCode ? <Navigate to={`/room/${roomCode}`} /> : homePage}
         />
         <Route path="/join" element={<RoomJoinPageFunctional />} />
         <Route path="/info" element={<Info />} />
-        <Route path="/create" element={<CreateRoomPageFunctional />} />
+        <Route
+          path="/create"
+          element={
+            // cy TODO: gotta fix this!
+            <CreateRoomPageFunctional
+              votesToSkip={1}
+              guestCanPause={false}
+              guestCanQueue={false}
+              update={false}
+              roomCode={"asdf"}
+              updateCallback={() => {}}
+            />
+          }
+        />
         <Route
           path="/room/:roomCode"
-          element={<RoomFunctional
-                leaveRoomCallback={clearRoomCode}
-                playbackInitCallback={() => {
-                  setPlaybackInit(true);
-                }}
-                playbackInit={playbackInit}
-              />
-           }
+          element={
+            <RoomFunctional
+              leaveRoomCallback={clearRoomCode}
+              playbackInitCallback={() => {
+                setPlaybackInit(true);
+              }}
+              playbackInit={playbackInit}
+            />
+          }
         />
       </Routes>
     </Router>

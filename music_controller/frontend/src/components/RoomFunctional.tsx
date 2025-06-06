@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Grid, Button, Typography } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import CreateRoomPageFunctional from "./CreateRoomPageFunctional";
@@ -15,11 +15,16 @@ const StyledGridItem = styled(Grid)`
 `;
 
 type Props = {
-    playbackInit: number,
-    playbackInitCallback: () => void
+  playbackInit: boolean;
+  playbackInitCallback: () => void;
+  leaveRoomCallback: () => void;
 };
 
-const RoomFunctional: React.FC<Props> = () => {
+const RoomFunctional: React.FC<Props> = ({
+  playbackInit,
+  playbackInitCallback,
+  leaveRoomCallback,
+}) => {
   const [votesToSkip, setVotesToSkip] = useState(2);
   const [guestCanPause, setGuestCanPause] = useState(false);
   const [guestCanQueue, setGuestCanQueue] = useState(false);
@@ -27,15 +32,12 @@ const RoomFunctional: React.FC<Props> = () => {
   const [showSettings, setShowSettings] = useState(false);
   const [showQueueSearch, setShowQueueSearch] = useState(false);
   const [spotifyAuthenticated, setSpotifyAuthenticated] = useState(false);
-  const [token, setToken] = useState(undefined);
+  const [token, setToken] = useState<string>();
 
-  // match is prop, added by router, describing how we got to this component
-  const roomCode = props.match.params.roomCode;
+  // cy TODO: fix this with router param match
+  //const roomCode = props.match.params.roomCode;
+  const roomCode = "123";
   const navigate = useNavigate();
-
-  useEffect(() => {
-    getRoomDetails();
-  }, [getRoomDetails]);
 
   function renderSettingsButton() {
     return (
@@ -100,12 +102,12 @@ const RoomFunctional: React.FC<Props> = () => {
     );
   }
 
-  function getRoomDetails() {
+  const getRoomDetails = useCallback(() => {
     // ensure response is OK
     fetch("/api/get-room" + "?code=" + roomCode)
       .then((response) => {
         if (!response.ok) {
-          props.leaveRoomCallback();
+          leaveRoomCallback();
           navigate("/");
         }
         return response.json();
@@ -117,15 +119,19 @@ const RoomFunctional: React.FC<Props> = () => {
         setIsHost(data.is_host);
         authenticateSpotify();
       });
-  }
+  }, [authenticateSpotify, leaveRoomCallback, navigate]);
+
+  useEffect(() => {
+    getRoomDetails();
+  }, [getRoomDetails]);
 
   function leaveButtonPressed() {
     const requestOptions = {
       method: "POST",
       headers: { "Content-Type": "application/json" },
     };
-    fetch("/api/leave-room", requestOptions).then((_response) => {
-      props.leaveRoomCallback();
+    fetch("/api/leave-room", requestOptions).then(() => {
+      leaveRoomCallback();
       navigate("/");
     });
   }
@@ -143,7 +149,7 @@ const RoomFunctional: React.FC<Props> = () => {
               if (response.ok) {
                 return response.json();
               }
-              props.leaveRoomCallback();
+              leaveRoomCallback();
               navigate("/");
             })
             .then((data) => {
@@ -167,7 +173,7 @@ const RoomFunctional: React.FC<Props> = () => {
           ) : null}
         </StyledGridItem>
         <StyledGridItem>
-          <MusicPlayerFunctional leaveRoomCallback={props.leaveRoomCallback} />
+          <MusicPlayerFunctional leaveRoomCallback={leaveRoomCallback} />
         </StyledGridItem>
         <StyledGridItem>
           <Grid container spacing={1} justifyContent="center">
