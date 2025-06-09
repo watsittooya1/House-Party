@@ -1,3 +1,5 @@
+// todo: remove this file once all necessary files import the correct type references
+
 export type Song = {
   title: string;
   artist: string;

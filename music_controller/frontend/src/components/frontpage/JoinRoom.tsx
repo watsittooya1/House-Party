@@ -9,8 +9,8 @@ const JoinRoom: React.FC = () => {
 
   return (
     <Stack spacing={1}>
-      <StyledText name="h4">enter room code</StyledText>
-      <StyledText name="p">CHRIS PLACE A TEXTFIELD HERE</StyledText>
+      <StyledText name="header">enter room code</StyledText>
+      <StyledText name="body">CHRIS PLACE A TEXTFIELD HERE</StyledText>
       <StyledButton onClick={() => {}}>join room</StyledButton>
       <StyledButton
         onClick={() => {

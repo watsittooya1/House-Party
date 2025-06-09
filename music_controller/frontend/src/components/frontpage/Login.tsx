@@ -10,7 +10,7 @@ const Login: React.FC = () => {
   return (
     <Stack spacing={1}>
       {/* TODO: make this ellipses animate 123! */}
-      <StyledText name="h4">authenticating...</StyledText>
+      <StyledText name="header">authenticating...</StyledText>
       <StyledButton
         onClick={() => {
           setStage("FrontPage");

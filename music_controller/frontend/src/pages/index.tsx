@@ -42,7 +42,7 @@ const Main: React.FC = () => {
               {/* todo: replace this image with a higher res image */}
               <img src="/static/favicon.png" />
             </LogoFlex>
-            <StyledText name="h4">House Party!</StyledText>
+            <StyledText name="header">House Party!</StyledText>
           </Stack>
         </Grid>
       </Grid>

@@ -1,16 +1,16 @@
-import { Grid } from "@mui/material";
 import StyledText from "./StyledText";
+import { Flex } from "./Flex";
 
-const LogoHeader: React.FC = () => {
+const LogoHeader: React.FC<{ widthInPx?: number }> = ({ widthInPx = 20 }) => {
   return (
-    <Grid container>
-      <Grid>
-        <img src="../../../static/favicon.png" />
-      </Grid>
-      <Grid>
-        <StyledText name="h4">House Party!</StyledText>
-      </Grid>
-    </Grid>
+    <Flex justifyContent="start" gap="10px">
+      <img
+        src="../../../static/favicon.png"
+        height={widthInPx}
+        width={widthInPx}
+      />
+      <StyledText name="body">house party!</StyledText>
+    </Flex>
   );
 };
 

@@ -9,10 +9,10 @@ const CreateRoom: React.FC = () => {
 
   return (
     <Stack spacing={1}>
-      <StyledText name="h4">Room Settings</StyledText>
-      <StyledText name="p">votes to skip</StyledText>
-      <StyledText name="p">allow guest to pause/play</StyledText>
-      <StyledText name="p">allow guests to queue songs</StyledText>
+      <StyledText name="header">Room Settings</StyledText>
+      <StyledText name="body">votes to skip</StyledText>
+      <StyledText name="body">allow guest to pause/play</StyledText>
+      <StyledText name="body">allow guests to queue songs</StyledText>
       <StyledButton onClick={() => {}}>create room</StyledButton>
       <StyledButton
         onClick={() => {
