@@ -1,12 +1,13 @@
 from rest_framework import generics, status
 from .serializers import RoomSerializer, CreateRoomSerializer, UpdateRoomSerializer
-from .models import Room
+from .models import Room, RoomMember
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from django.http import JsonResponse
 
 class RoomsView(generics.ListAPIView):
     queryset = Room.objects.all()
+    serializer_class = RoomSerializer
 
 class RoomView(APIView):
     lookup_url_kwarg = 'code'
@@ -44,16 +45,19 @@ class RoomView(APIView):
         if not queryset.exists():
             room = Room(host=host, guest_can_pause=guest_can_pause, guest_can_queue=guest_can_queue, votes_to_skip=votes_to_skip)
             room.save()
-            self.request.session['room_code'] = room.code
+            
+            room_member = RoomMember(user_id=self.request.session.session_key, code=room.code)
+            room_member.save()
             return Response(RoomSerializer(room).data, status=status.HTTP_201_CREATED)
         
         # otherwise, update host's current room to settings of new room and place them in the room
+        # do NOT change the room code
         room = queryset[0]
         room.guest_can_pause = guest_can_pause
         room.guest_can_queue = guest_can_queue
         room.votes_to_skip = votes_to_skip
         room.save(update_fields=['guest_can_pause', 'guest_can_queue', 'votes_to_skip'])
-        self.request.session['room_code'] = room.code
+        
         return Response(RoomSerializer(room).data, status=status.HTTP_200_OK)
     
     # UPDATE room
@@ -65,14 +69,16 @@ class RoomView(APIView):
         if not serializer.is_valid():
             return Response({'Bad Request': 'Invalid request'}, status=status.HTTP_400_BAD_REQUEST)
 
+        room_membership_query = RoomMember.objects.filter(user_id=self.request.session.session_key)
+        if len(room_membership_query) == 0:
+            return Response({'Not Found': 'User not in room'}, status=status.HTTP_404_NOT_FOUND)
 
-        queryset = Room.objects.filter(code=serializer.data.get('code'))
-        if not queryset.exists():
-            return Response({'Not Found': 'Room not found'}, status=status.HTTP_404_NOT_FOUND)
-
-        room = queryset[0]
-        user_id = self.request.session.session_key
-        if room.host != user_id:
+        room_query = Room.objects.filter(code=room_membership_query[0].code)
+        if len(room_query) == 0:
+            return Response({'Not Found': 'User\'s room not found'}, status=status.HTTP_404_NOT_FOUND)
+        
+        room = room_query[0]
+        if room.host != self.request.session.session_key:
             return Response({'Forbidden': 'Only the room host is allowed to update the room'}, status=status.HTTP_403_FORBIDDEN)
 
         room.guest_can_pause = serializer.data.get('guest_can_pause')
@@ -91,22 +97,32 @@ class JoinRoomView(APIView):
         if code == None:
             return Response({'Bad Request': 'Room code required'}, status=status.HTTP_400_BAD_REQUEST)
         
-        room_result = Room.objects.filter(code=code)
-        if len(room_result) == 0:
+        room_membership_query = RoomMember.objects.filter(user_id=self.request.session.session_key)
+        if len(room_membership_query) != 0:
+            return Response({'Forbidden': 'User is already in a room'}, status=status.HTTP_403_FORBIDDEN)
+        
+        room_query = Room.objects.filter(code=code)
+        if len(room_query) == 0:
             return Response({'Not Found': 'Room not found'}, status=status.HTTP_404_NOT_FOUND)
         
-        room = room_result[0]
-        self.request.session['room_code'] = room.code
+        room = room_query[0]
+        room_member = RoomMember(user_id=self.request.session.session_key, code=room.code)
+        room_member.save()
         return Response(status=status.HTTP_200_OK)
         
         
 class LeaveRoomView(APIView):
-    def post(self):
-        if 'room_code' not in self.request.session:
-            return Response({'Forbidden': 'User is not in a room'}, status=status.HTTP_412_PRECONDITION_FAILED)
+    def post(self, request):
+        if not self.request.session.exists(self.request.session.session_key):
+            self.request.session.create()
         
-        self.request.session.pop('room_code')
-
+        room_membership_query = RoomMember.objects.filter(user_id=self.request.session.session_key)
+        if len(room_membership_query) == 0:
+            return Response({'Precondition Failed': 'User is not in a room'}, status=status.HTTP_412_PRECONDITION_FAILED)
+        
+        room_membership = room_membership_query[0]
+        room_membership.delete()
+        
         # check if user was host of room, if so delete
         room_results = Room.objects.filter(host=self.request.session.session_key)
         if len(room_results) > 0:
@@ -117,9 +133,14 @@ class LeaveRoomView(APIView):
 
 
 class CurrentRoomView(APIView):
-    def get(self):
+    def get(self, request):
         if not self.request.session.exists(self.request.session.session_key):
             self.request.session.create()
+            
+        room_membership_query = RoomMember.objects.filter(user_id=self.request.session.session_key)
+        if len(room_membership_query) == 0:
+            return JsonResponse({ 'code': None }, status=status.HTTP_200_OK)
 
-        return JsonResponse({ 'code': self.request.session.get('room_code') }, status=status.HTTP_200_OK)
+        room_membership = room_membership_query[0]
+        return JsonResponse({ 'code': room_membership.code }, status=status.HTTP_200_OK)
     

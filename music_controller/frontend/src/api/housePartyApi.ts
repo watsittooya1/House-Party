@@ -1,5 +1,9 @@
 import { baseApi } from "./baseApi";
-import type { Room } from "./housePartyApiTypes";
+import type {
+  CreateRoomRequest,
+  GetCurrentRoomResponse,
+  Room,
+} from "./housePartyApiTypes";
 
 export const housePartyApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
@@ -7,8 +11,12 @@ export const housePartyApi = baseApi.injectEndpoints({
       query: () => "/api/room",
       providesTags: ["Room"],
     }),
-    createRoom: builder.mutation<void, void>({
-      query: () => "/api/create-room",
+    createRoom: builder.mutation<Room, CreateRoomRequest>({
+      query: (request) => ({
+        url: "/api/room",
+        method: "POST",
+        body: request,
+      }),
     }),
     getRoom: builder.query<Room, void>({
       query: () => "/api/get-room",
@@ -21,12 +29,18 @@ export const housePartyApi = baseApi.injectEndpoints({
     userInRoom: builder.query<boolean, void>({
       query: () => "/api/user-in-room",
     }),
-    leaveRoom: builder.query<void, void>({
-      query: () => "/api/leave-room",
+    leaveRoom: builder.mutation<void, void>({
+      query: () => ({
+        url: "/room/leave",
+        method: "POST",
+      }),
       //providesTags: ["Token"],
     }),
     updateRoom: builder.mutation<void, void>({
       query: () => "/api/update-room",
+    }),
+    getCurrentRoom: builder.query<GetCurrentRoomResponse, void>({
+      query: () => "/api/room/current",
     }),
   }),
 });
@@ -37,6 +51,7 @@ export const {
   useGetRoomQuery,
   useJoinRoomQuery,
   useUserInRoomQuery,
-  useLeaveRoomQuery,
+  useLeaveRoomMutation,
   useUpdateRoomMutation,
+  useGetCurrentRoomQuery,
 } = housePartyApi;

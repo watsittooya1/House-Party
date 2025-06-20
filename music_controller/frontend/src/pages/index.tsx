@@ -2,7 +2,7 @@ import React, { useMemo } from "react";
 import { Grid, Stack } from "@mui/material";
 import styled from "@emotion/styled";
 import { Flex } from "../components/common/Flex";
-import { useFrontPageStore } from "../store/FrontPageStore";
+import { useFrontPageStore } from "../store/frontPageStore";
 import FrontPage from "../components/frontpage/FrontPage";
 import { useShallow } from "zustand/shallow";
 import CreateRoom from "../components/frontpage/CreateRoom";
@@ -19,7 +19,7 @@ const LogoFlex = styled(Flex)`
 const Main: React.FC = () => {
   const [stage] = useFrontPageStore(useShallow((state) => [state.stage]));
 
-  const buttonInterface = useMemo(() => {
+  const page = useMemo(() => {
     switch (stage) {
       case "FrontPage":
         return <FrontPage />;
@@ -35,7 +35,7 @@ const Main: React.FC = () => {
   return (
     <Page>
       <Grid container spacing={2}>
-        <Grid>{buttonInterface}</Grid>
+        <Grid>{page}</Grid>
         <Grid display="flex" alignItems="center" justifyContent="center">
           <Stack alignItems="center">
             <LogoFlex>

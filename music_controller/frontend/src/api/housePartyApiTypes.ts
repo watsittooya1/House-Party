@@ -7,3 +7,13 @@ export type Room = {
   votes_to_skip: number;
   created_at: Date;
 };
+
+export type CreateRoomRequest = {
+  votes_to_skip: number;
+  guest_can_pause: boolean;
+  guest_can_queue: boolean;
+};
+
+export type GetCurrentRoomResponse = {
+  code: string | undefined;
+};

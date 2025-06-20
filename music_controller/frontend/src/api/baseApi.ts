@@ -4,9 +4,8 @@ export const tagTypes = ["Song", "Token", "Room"] as const;
 
 export const baseApi = createApi({
   baseQuery: fetchBaseQuery({
-    baseUrl: `${window.location.protocol}//${window.location.hostname}/api`,
+    baseUrl: `${window.location.protocol}//${window.location.hostname}:8000`,
     credentials: "include",
-    //prepareHeaders: cy TODO: it would be pertitent to provide auth headers here
   }),
   tagTypes,
   endpoints: () => ({}),

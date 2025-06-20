@@ -21,3 +21,6 @@ class Room(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     current_song = models.CharField(max_length=50, null=True)
     
+class RoomMember(models.Model):
+    code = models.CharField(max_length=8, unique=True)
+    user_id = models.CharField(max_length=50, unique=True)
