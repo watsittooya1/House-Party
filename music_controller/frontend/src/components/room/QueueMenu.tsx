@@ -1,240 +1,158 @@
 /// <reference types="spotify-web-playback-sdk" />
-import { type ChangeEvent, useCallback, useState } from "react";
+import { type ChangeEvent, useCallback, useEffect, useState } from "react";
 import {
-  Grid,
-  Button,
-  Typography,
-  TextField,
-  Collapse,
-  Alert,
+  Slide,
+  Dialog,
+  dialogClasses,
+  IconButton,
+  Tooltip,
+  CircularProgress,
 } from "@mui/material";
 import styled from "@emotion/styled";
-import { testTrackList } from "../../utility/testTracks";
+import { useLazySearchTrackQuery } from "../../api/spotifyApi";
+import { useNavigate } from "react-router-dom";
+import { removeQueryParam, useQueryParams } from "../../utility/queryParams";
+import { PageGrid } from "../common/PageGrid";
+import { pageGridPadding, queueWidth } from "../../utility/dimensions";
+import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
+import SearchIcon from "@mui/icons-material/Search";
+import colorScheme from "../../utility/colorScheme";
+import TrackSearchResult from "./TrackSearchResult";
+import { Flex } from "../common/Flex";
+import StyledText from "../common/StyledText";
+import { StyledTextField } from "../common/StyledTextField";
 
-type Props = {
-  closeMenuCallback: () => void;
-};
+// this is how much we have to offset our dialog so dimensions line up with the music player
+const queueMenuOffset =
+  0.01 * queueWidth * (100 - 2 * pageGridPadding) + pageGridPadding;
 
-const CenteredGridItem = styled(Grid)`
-  size: {
-    xs: 12;
+const StyledDialog = styled(Dialog)`
+  ${`& .${dialogClasses.paper}`} {
+    width: 100%;
+    max-width: 100%;
+    height: 100%;
+    max-height: 100%;
+    position: absolute;
+    left: ${`-${queueMenuOffset}%`};
+    margin: 0;
+    border-radius: 0px;
+    overflow: hidden;
+    box-shadow: none;
   }
-  align-items: center;
 `;
 
-const StyledGridItem = styled(Grid)<{ xsWidth?: number }>`
-  size: {
-    xs: ${({ xsWidth = 12 }) => xsWidth};
-  }
-  align-items: center;
+const Offset = styled.div`
+  height: 100%;
+  position: relative;
+  left: ${`${queueMenuOffset}%`};
 `;
 
-const QueueMenu: React.FC<Props> = ({ closeMenuCallback }) => {
-  const [trackQuery, setTrackQuery] = useState("");
-  const [trackList, setTrackList] = useState<Spotify.Track[]>(testTrackList);
-  const [searchError, setSearchError] = useState("");
-  const [selectedTrackUri, setSelectedTrackUri] = useState("");
-  const [_successMsg, setSuccessMsg] = useState("");
-  const [_errorMsg, setErrorMsg] = useState("");
+const StyledReturn = styled(KeyboardArrowDownIcon)`
+  color: ${colorScheme.gray};
+  font-size: 50px;
+`;
 
-  function changeTrackQuery(e: ChangeEvent<HTMLInputElement>) {
-    setSearchError("");
-    setTrackQuery(e.target.value);
-  }
+const StyledSearch = styled(SearchIcon)`
+  color: ${colorScheme.gray};
+  font-size: 50px;
+`;
 
-  function executeTrackSearch() {
-    // cy TODO: may be able to handle this via rtkquery
-    // if (!isAuthenticated) {
-    //   setSearchError("Host must be logged in.");
-    //   return;
-    // }
-    if (trackQuery === "") {
-      setSearchError("Enter a search query.");
-      return;
+const SearchResultsContainer = styled(Flex)`
+  overflow-y: auto;
+  margin: 0% 10% 0% 10%;
+`;
+
+const StyledCircularProgress = styled(CircularProgress)``;
+
+const QueueMenu: React.FC = () => {
+  const [show] = useQueryParams(["queueTrack"]);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [triggerSearch, { isFetching }] = useLazySearchTrackQuery();
+  const [searchResults, setSearchResults] = useState<Spotify.Track[]>([]);
+  const [searchError, setSearchError] = useState<string>();
+  const navigate = useNavigate();
+
+  // cy TODO: handle empty searches in the search input! should show some sort of error
+  // cy TODO: handle empty search results
+  const handleSearch = useCallback(() => {
+    if (searchQuery.length == 0) {
+      setSearchError("Enter a search query");
     }
-    fetch(`/spotify/search-track?track=${trackQuery.toString()}`)
-      .then((response) => response.json())
-      .then((data) => {
-        if (data.length == 0) {
-          setSearchError("No search results.");
-        } else {
-          for (let i = 0; i < data.length; i++) {
-            data[i].selected = false;
-          }
-          setTrackList(data);
-        }
-      });
-  }
+    triggerSearch({ query: searchQuery })
+      .unwrap()
+      .then((resp) => setSearchResults(resp.tracks));
+  }, [searchQuery, triggerSearch]);
 
-  const handleTrackSelect = useCallback(
-    (songUri: string) => {
-      const trackListCopy = [...trackList!];
-      for (let i = 0; i < trackListCopy.length; i++) {
-        if (trackListCopy[i].uri == songUri) {
-          //trackListCopy[i].selected = true;
-          setSelectedTrackUri(songUri);
-        } else {
-          //trackListCopy[i].selected = false;
-        }
-      }
-    },
-    [trackList, setSelectedTrackUri]
-  );
-
-  const queueTrack = useCallback(() => {
-    if (selectedTrackUri === "") {
-      setErrorMsg("You must select a track to queue.");
-      return;
-    }
-    const requestOptions = {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
+  useEffect(() => {
+    return () => {
+      navigate(`?${removeQueryParam("queueTrack")}`);
     };
-    const url = `/spotify/add-to-queue?uri=${selectedTrackUri.toString()}`;
-    fetch(url, requestOptions)
-      .then((response) => response.json())
-      .then(() => {
-        setSuccessMsg("Song queued successfully!");
-      });
-  }, [selectedTrackUri, setSuccessMsg, setErrorMsg]);
+  }, [navigate]);
 
-  function renderSearchBar() {
-    return (
-      <Grid
-        container
-        spacing={2}
-        sx={{ mt: 1 }}
-        alignItems="center"
-        justifyContent="center"
-      >
-        <CenteredGridItem>
-          {searchError === "" ? (
-            <TextField
-              fullWidth
-              id="outlined-basic"
-              onChange={changeTrackQuery}
-              label="Search a track name"
-              variant="outlined"
-            />
-          ) : (
-            <TextField
-              error
-              fullWidth
-              id="outlined-basic"
-              onChange={changeTrackQuery}
-              label="Search a track name"
-              variant="outlined"
-              helperText={searchError}
-            />
-          )}
-        </CenteredGridItem>
-        <CenteredGridItem>
-          <Button
-            variant="contained"
-            color="primary"
-            onClick={executeTrackSearch}
-          >
-            Search
-          </Button>
-        </CenteredGridItem>
-      </Grid>
-    );
-  }
+  const handleExit = useCallback(() => {
+    navigate(`?${removeQueryParam("queueTrack")}`);
+  }, [navigate]);
 
-  function renderTrackList() {
-    if (trackList === undefined) {
-      return <></>;
-    }
-    return (
-      <Grid container alignItems="stretch" spacing={2}>
-        {trackList.map((song) => (
-          <Grid key={song.uri} size={{ xs: 3 }}>
-            <Button
-              //variant={song.selected ? "contained" : "outlined"}
-              onClick={() => handleTrackSelect(song.uri)}
-              sx={{
-                padding: 1,
-                width: "100%",
-                height: "100%",
-                display: "flex",
-                justifyContent: "center",
-                alignItems: "center",
-              }}
+  return (
+    <Slide direction="up" in={!!show}>
+      <StyledDialog open hideBackdrop>
+        <Offset>
+          <PageGrid justify="left" align="flex-end">
+            <Flex
+              width={`${100.0 - queueMenuOffset}%`}
+              direction="column"
+              height="95%"
             >
-              <div>
-                <img
-                  src={
-                    "asdf" //"song.image.url"
-                  }
-                  width="100"
+              <Flex
+                width="100%"
+                height="10%"
+                direction="row"
+                alignItems="center"
+              >
+                <Tooltip title="Exit Queue Menu">
+                  <IconButton onClick={handleExit}>
+                    <StyledReturn />
+                  </IconButton>
+                </Tooltip>
+                <StyledTextField
+                  onChange={(e: ChangeEvent<HTMLInputElement>) => {
+                    setSearchError(undefined);
+                    setSearchQuery(e.target.value);
+                  }}
+                  label="search for a track"
+                  type="search"
+                  error={!!searchError}
+                  helperText={searchError}
                 />
-
-                <Typography color="textPrimary" variant="subtitle2">
-                  {song.name}
-                </Typography>
-                <Typography color="textSecondary" variant="caption">
-                  {song.artists.join(", ")}
-                </Typography>
-              </div>
-            </Button>
-          </Grid>
-        ))}
-      </Grid>
-    );
-  }
-
-  return trackList === undefined ? (
-    <></>
-  ) : (
-    <div>
-      <Grid container spacing={3} sx={{ mb: 10 }} justifyContent="center">
-        <StyledGridItem>{renderSearchBar()}</StyledGridItem>
-        {trackList.length !== 0 ? (
-          <StyledGridItem>{renderTrackList()}</StyledGridItem>
-        ) : null}
-        <StyledGridItem>
-          <Grid container spacing={1} justifyContent="center">
-            <Grid>
-              <Button variant="contained" color="primary" onClick={queueTrack}>
-                Add to Queue
-              </Button>
-            </Grid>
-            <Grid>
-              <Button
-                variant="contained"
-                color="secondary"
-                onClick={closeMenuCallback}
+                {isFetching ? (
+                  <StyledCircularProgress />
+                ) : (
+                  <Tooltip title="Submit Search">
+                    <IconButton onClick={handleSearch}>
+                      <StyledSearch />
+                    </IconButton>
+                  </Tooltip>
+                )}
+              </Flex>
+              <SearchResultsContainer
+                width="100%"
+                direction="column"
+                grow="1"
+                gap="1%"
               >
-                Close
-              </Button>
-            </Grid>
-          </Grid>
-        </StyledGridItem>
-        <StyledGridItem xsWidth={6}>
-          <Collapse in={_errorMsg != "" || _successMsg != ""}>
-            {_successMsg != "" ? (
-              <Alert
-                severity="success"
-                onClose={() => {
-                  setSuccessMsg("");
-                }}
-              >
-                {_successMsg}
-              </Alert>
-            ) : (
-              <Alert
-                severity="error"
-                onClose={() => {
-                  setErrorMsg("");
-                }}
-              >
-                {_errorMsg}
-              </Alert>
-            )}
-          </Collapse>
-        </StyledGridItem>
-      </Grid>
-    </div>
+                {searchResults.length !== 0 ? (
+                  searchResults.map((track) => (
+                    <TrackSearchResult track={track} />
+                  ))
+                ) : (
+                  <StyledText name="body">no tracks found</StyledText>
+                )}
+              </SearchResultsContainer>
+            </Flex>
+          </PageGrid>
+        </Offset>
+      </StyledDialog>
+    </Slide>
   );
 };
 

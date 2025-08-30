@@ -1,68 +1,64 @@
-/// <reference types="spotify-web-playback-sdk" />
 import { baseApi } from "./baseApi";
+import {
+  type CurrentSongResponse,
+  type SearchTrackResponse,
+} from "./spotifyApiTypes";
 
-// Define a service using a base URL and expected endpoints
 export const spotifyApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     getAuthUrl: builder.query<{ url: string }, void>({
-      query: () => "/spotify/get-auth-url",
-      //providesTags: ["Token"],
+      query: () => "/spotify/auth-url",
     }),
-    getAuthToken: builder.query<{ token: string }, void>({
-      query: () => "/spotify/get-auth-token",
-      //providesTags: ["Token"],
-    }),
-
-    // cy TODO
-    getRedirect: builder.query<string, void>({
-      query: () => "/spotify/redirect",
+    getHostToken: builder.query<{ token: string }, void>({
+      query: () => "/spotify/host-token",
       providesTags: ["Token"],
-      transformResponse: () => "asdf",
     }),
-    getIsAuthenticated: builder.query<{ status: boolean }, void>({
-      query: () => "/spotify/is-authenticated",
-      //providesTags: ["Token"],
+    getCurrentTrack: builder.query<CurrentSongResponse | null, void>({
+      query: () => "/spotify/current-track",
+      providesTags: ["Track"],
     }),
-    getCurrentSong: builder.query<Spotify.Track, void>({
-      query: () => "/spotify/current-song",
-      providesTags: ["Song"],
+    performPause: builder.mutation<void, void>({
+      query: () => ({ url: "/spotify/pause", method: "PUT" }),
+      invalidatesTags: ["Track"],
     }),
-    performPause: builder.query<void, void>({
-      query: () => "/spotify/pause",
+    performPlay: builder.mutation<void, void>({
+      query: () => ({ url: "/spotify/play", method: "PUT" }),
+      invalidatesTags: ["Track"],
     }),
-    performPlay: builder.query<void, void>({
-      query: () => "/spotify/play",
+    performSkip: builder.mutation<void, void>({
+      query: () => ({ url: "/spotify/skip", method: "POST" }),
+      invalidatesTags: ["Track", "Queue"],
     }),
-    performSkip: builder.query<void, void>({
-      query: () => "/spotify/skip",
+    getQueue: builder.query<{ queue: Spotify.Track[] }, void>({
+      query: () => "/spotify/queue",
+      providesTags: ["Queue"],
     }),
-    getQueue: builder.query<Spotify.Track[], void>({
-      query: () => "/spotify/get-queue",
+    searchTrack: builder.query<SearchTrackResponse, { query: string }>({
+      query: (request) => `/spotify/search?q=${request.query}`,
     }),
-    searchTrack: builder.query<Spotify.Track[], void>({
-      query: () => "/spotify/search-track",
-    }),
-    addToQueue: builder.query<void, void>({
-      query: () => "/spotify/add-to-queue",
+    addToQueue: builder.mutation<void, { uri: string }>({
+      query: (request) => ({
+        url: `/spotify/queue?uri=${request.uri}`,
+        method: "POST",
+      }),
+      invalidatesTags: ["Queue"],
     }),
     getUserName: builder.query<{ username: string }, void>({
-      query: () => "/spotify/get-user-name",
+      query: () => "/spotify/username",
+      providesTags: ["Login"],
     }),
   }),
 });
 
 export const {
-  useGetAuthUrlQuery,
-  useGetAuthTokenQuery,
-  useGetRedirectQuery,
-  useGetIsAuthenticatedQuery,
-  useGetCurrentSongQuery,
-  useLazyGetCurrentSongQuery,
-  usePerformPauseQuery,
-  usePerformPlayQuery,
-  usePerformSkipQuery,
+  useLazyGetAuthUrlQuery,
+  useGetHostTokenQuery,
+  useGetCurrentTrackQuery,
+  usePerformPauseMutation,
+  usePerformPlayMutation,
+  usePerformSkipMutation,
   useGetQueueQuery,
-  useSearchTrackQuery,
-  useAddToQueueQuery,
+  useLazySearchTrackQuery,
+  useAddToQueueMutation,
   useGetUserNameQuery,
 } = spotifyApi;

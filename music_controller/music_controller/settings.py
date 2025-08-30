@@ -32,8 +32,7 @@ ALLOWED_HOSTS = [
     '10.0.0.21', 
     '142.93.184.143', 
     'house-party.social', 
-    'localhost',
-    'localhost:5173'
+    'localhost'
     ]
 
 CSRF_TRUSTED_ORIGINS = [

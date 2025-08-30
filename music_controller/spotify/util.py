@@ -6,19 +6,22 @@ from requests import post
 
 SPOTIFY_BASE_URL = "https://api.spotify.com/v1/me/"
 
+
 def get_user_tokens(session_id):
     user_tokens = SpotifyToken.objects.filter(user=session_id)
     if user_tokens.exists():
         return user_tokens[0]
     else:
         return None
-
+    
+    
 def update_or_create_user_tokens(session_id, access_token, token_type, expires_in, refresh_token):
+
+    if not expires_in:
+        raise Exception("Must supply an expiration value")
+    
     tokens = get_user_tokens(session_id)
-    if expires_in != None:
-        expires_in = timezone.now() + timedelta(seconds=expires_in)
-    else:
-        expires_in = timezone.now()
+    expires_in = timezone.now() + timedelta(seconds=expires_in)
     
     if tokens:
         tokens.access_token = access_token
@@ -54,7 +57,12 @@ def is_spotify_authenticated(session_id):
 
 # returns true if refreshed, false if not logged in
 def refresh_spotify_token(session_id):
-    refresh_token = get_user_tokens(session_id).refresh_token
+    
+    tokens = get_user_tokens(session_id)
+    if not tokens:
+        return False
+    
+    refresh_token = tokens.refresh_token
     response = post('https://accounts.spotify.com/api/token', data={
         'grant_type': 'refresh_token',
         'refresh_token': refresh_token,

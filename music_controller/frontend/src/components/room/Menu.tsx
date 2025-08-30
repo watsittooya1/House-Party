@@ -3,41 +3,89 @@ import styled from "@emotion/styled";
 import { Flex } from "../../components/common/Flex";
 import colorScheme from "../../utility/colorScheme";
 import { StyledButton } from "../../components/common/StyledButton";
+import { useLeaveRoomMutation } from "../../api/housePartyApi";
+import { useNavigate } from "react-router-dom";
 import {
-  useGetCurrentRoomQuery,
-  useLeaveRoomMutation,
-} from "../../api/housePartyApi";
+  addQueryParam,
+  removeQueryParam,
+  useQueryParams,
+} from "../../utility/queryParams";
+import { Dialog, dialogClasses, Slide } from "@mui/material";
+
+const StyledDialog = styled(Dialog)`
+  ${`& .${dialogClasses.paper}`} {
+    width: fit-content;
+    max-width: fit-content;
+    position: absolute;
+    left: 0;
+    margin: 0;
+    border-top-right-radius: 16px;
+    border-bottom-right-radius: 16px;
+  }
+`;
 
 const MenuContainer = styled(Flex)`
   background-color: ${colorScheme.darkGray};
 `;
 
-const Menu: React.FC<{ closeMenuCallback: () => void }> = ({
-  closeMenuCallback,
+const Menu: React.FC<{ show: boolean; onCloseMenu: () => void }> = ({
+  show,
+  onCloseMenu,
 }) => {
-  const { data, isLoading } = useGetCurrentRoomQuery();
+  const navigate = useNavigate();
   const [leaveRoom] = useLeaveRoomMutation();
+  const [showQueue] = useQueryParams(["showQueue"]);
 
   const handleLeaveRoom = useCallback(async () => {
     await leaveRoom();
-  }, [leaveRoom]);
+    navigate("/");
+  }, [leaveRoom, navigate]);
 
-  const handlePrintRoom = useCallback(() => {
-    if (isLoading) {
-      console.log("room loading...");
-    } else if (data == null) {
-      console.log("data is null!");
+  const openEditRoomDialog = useCallback(() => {
+    navigate(`?${addQueryParam("editRoom", "true")}`);
+    onCloseMenu();
+  }, [navigate, onCloseMenu]);
+
+  const toggleShowQueue = useCallback(() => {
+    if (showQueue) {
+      navigate(`?${removeQueryParam("showQueue")}`);
     } else {
-      console.log(`code is ${data.code}`);
+      navigate(`?${addQueryParam("showQueue", "true")}`);
     }
-  }, [data, isLoading]);
+    onCloseMenu();
+  }, [showQueue, navigate, onCloseMenu]);
 
   return (
-    <MenuContainer direction="column">
-      <StyledButton onClick={closeMenuCallback}>option 1</StyledButton>
-      <StyledButton onClick={handlePrintRoom}>get room details</StyledButton>
-      <StyledButton onClick={handleLeaveRoom}>close room</StyledButton>
-    </MenuContainer>
+    <Slide direction="right" in={!!show}>
+      <StyledDialog open hideBackdrop>
+        <MenuContainer direction="column" alignItems="flex-start">
+          <StyledButton onClick={onCloseMenu} padding="0px 8px" fontSize="24px">
+            close menu
+          </StyledButton>
+          <StyledButton
+            onClick={openEditRoomDialog}
+            padding="0px 8px"
+            fontSize="24px"
+          >
+            edit room settings
+          </StyledButton>
+          <StyledButton
+            onClick={toggleShowQueue}
+            padding="0px 8px"
+            fontSize="24px"
+          >
+            toggle show queue
+          </StyledButton>
+          <StyledButton
+            onClick={handleLeaveRoom}
+            padding="0px 8px"
+            fontSize="24px"
+          >
+            close room
+          </StyledButton>
+        </MenuContainer>
+      </StyledDialog>
+    </Slide>
   );
 };
 

@@ -2,7 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { useGetCurrentRoomQuery } from "../../api/housePartyApi";
 import { useEffect } from "react";
 import CircularProgress from "@mui/material/CircularProgress";
-import { Page } from "../../components/common/Page";
+import { PageGrid } from "../../components/common/PageGrid";
 
 const CodelessRoom: React.FC = () => {
   // ideally, the user should never land on this page.
@@ -20,7 +20,7 @@ const CodelessRoom: React.FC = () => {
     }
   }, [data, isLoading, navigate]);
 
-  return <Page>{isLoading && <CircularProgress />}</Page>;
+  return <PageGrid>{isLoading && <CircularProgress />}</PageGrid>;
 };
 
 export default CodelessRoom;

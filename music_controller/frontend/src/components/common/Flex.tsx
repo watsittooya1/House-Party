@@ -7,6 +7,8 @@ type FlexProps = {
   gap?: string;
   width?: string;
   height?: string;
+  grow?: string;
+  shrink?: string;
 };
 
 export const Flex = styled.div<FlexProps>`
@@ -17,4 +19,6 @@ export const Flex = styled.div<FlexProps>`
   ${({ gap }) => (gap != null ? `gap: ${gap};` : "")}
   ${({ width }) => (width != null ? `width: ${width};` : "")}
   ${({ height }) => (height != null ? `height: ${height};` : "")}
+  ${({ grow }) => (grow != null ? `flex-grow: ${grow};` : "")}
+  ${({ shrink }) => (shrink != null ? `flex-shrink: ${shrink};` : "")}
 `;

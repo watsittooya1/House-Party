@@ -1,16 +1,25 @@
-import StyledText from "./StyledText";
+import { styled } from "@mui/material";
 import { Flex } from "./Flex";
+import StyledText from "./StyledText";
 
-const LogoHeader: React.FC<{ widthInPx?: number }> = ({ widthInPx = 20 }) => {
+const Container = styled(Flex)`
+  //position: absolute;
+  //top: 5%;
+  //left: 5%;
+  justify-content: start;
+  gap: 10px;
+`;
+
+const LogoHeader: React.FC = () => {
   return (
-    <Flex justifyContent="start" gap="10px">
+    <Container>
       <img
-        src="../../../static/favicon.png"
-        height={widthInPx}
-        width={widthInPx}
+        src="../../../static/houseparty_small.png"
+        height="20px"
+        width="20px"
       />
       <StyledText name="body">house party!</StyledText>
-    </Flex>
+    </Container>
   );
 };
 

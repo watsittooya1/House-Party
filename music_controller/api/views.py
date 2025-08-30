@@ -14,6 +14,9 @@ class RoomView(APIView):
 
     # GET room
     def get(self, request):
+        if not self.request.session.exists(self.request.session.session_key):
+            self.request.session.create()
+            
         code = request.GET.get(self.lookup_url_kwarg)
         if code == None:
             return Response({'Bad Request': 'Code parameter not found in request'}, status=status.HTTP_400_BAD_REQUEST)
@@ -46,7 +49,7 @@ class RoomView(APIView):
             room = Room(host=host, guest_can_pause=guest_can_pause, guest_can_queue=guest_can_queue, votes_to_skip=votes_to_skip)
             room.save()
             
-            room_member = RoomMember(user_id=self.request.session.session_key, code=room.code)
+            room_member = RoomMember(user_id=self.request.session.session_key, room=room)
             room_member.save()
             return Response(RoomSerializer(room).data, status=status.HTTP_201_CREATED)
         
@@ -73,7 +76,7 @@ class RoomView(APIView):
         if len(room_membership_query) == 0:
             return Response({'Not Found': 'User not in room'}, status=status.HTTP_404_NOT_FOUND)
 
-        room_query = Room.objects.filter(code=room_membership_query[0].code)
+        room_query = Room.objects.filter(code=room_membership_query[0].room.code)
         if len(room_query) == 0:
             return Response({'Not Found': 'User\'s room not found'}, status=status.HTTP_404_NOT_FOUND)
         
@@ -106,9 +109,9 @@ class JoinRoomView(APIView):
             return Response({'Not Found': 'Room not found'}, status=status.HTTP_404_NOT_FOUND)
         
         room = room_query[0]
-        room_member = RoomMember(user_id=self.request.session.session_key, code=room.code)
+        room_member = RoomMember(user_id=self.request.session.session_key, room=room)
         room_member.save()
-        return Response(status=status.HTTP_200_OK)
+        return Response({"code": code }, status=status.HTTP_200_OK)
         
         
 class LeaveRoomView(APIView):
@@ -142,5 +145,5 @@ class CurrentRoomView(APIView):
             return JsonResponse({ 'code': None }, status=status.HTTP_200_OK)
 
         room_membership = room_membership_query[0]
-        return JsonResponse({ 'code': room_membership.code }, status=status.HTTP_200_OK)
+        return JsonResponse({ 'code': room_membership.room.code }, status=status.HTTP_200_OK)
     

@@ -1,13 +1,23 @@
-import React from "react";
-import { IconButton, LinearProgress } from "@mui/material";
+import React, { useCallback, useEffect, useMemo } from "react";
+import {
+  Grid,
+  IconButton,
+  LinearProgress,
+  Stack,
+  Tooltip,
+} from "@mui/material";
 import styled from "@emotion/styled";
-import { Flex } from "../../components/common/Flex";
 import StyledText from "../../components/common/StyledText";
-import LogoHeader from "../../components/common/LogoHeader";
 import PlayArrowIcon from "@mui/icons-material/PlayArrow";
 import SkipNextIcon from "@mui/icons-material/SkipNext";
 import PauseIcon from "@mui/icons-material/Pause";
 import colorScheme from "../../utility/colorScheme";
+import {
+  useGetCurrentTrackQuery,
+  usePerformPauseMutation,
+  usePerformPlayMutation,
+  usePerformSkipMutation,
+} from "../../api/spotifyApi";
 
 const StyledSkip = styled(SkipNextIcon)`
   color: ${colorScheme.gray};
@@ -24,92 +34,131 @@ const StyledPlay = styled(PlayArrowIcon)`
   font-size: 50px;
 `;
 
-const RoomContainer = styled.div`
-  height: 100%;
-  width: 100%;
-  display: grid;
-  grid-template-rows: 10% 40% 10%;
-  gap: 15%;
-  //margin: 5%;
-`;
-
-const AlbumCoverContainer = styled(Flex)`
-  height: 100%;
-  align-items: center;
-  //aspect-ratio: 1;
-`;
-
 const SquareImage = styled.img`
   aspect-ratio: 1;
   width: 100%;
 `;
 
-const MusicPlayerLabels = styled.div`
-  display: grid;
-  grid-template-columns: 40% 60%;
-`;
-
-const TrackDetailsContainer = styled(Flex)`
-  margin: 3% 5%;
-`;
-
-const ButtonsContainer = styled(Flex)`
-  margin: 20% auto 10% auto;
-  font-size: 50px;
-`;
-
-// rename this
-const AllContainer = styled(Flex)`
-  margin: 3%;
+const StyledLinearProgress = styled(LinearProgress)`
+  height: 10px;
+  border-radius: 5px;
+  ${`& .MuiLinearProgress-bar`} {
+    background-color: ${colorScheme.gray};
+    border-radius: 5px;
+  }
+  ${`&.MuiLinearProgress-colorPrimary`} {
+    background-color: ${colorScheme.darkGray};
+    border-radius: 5px;
+  }
 `;
 
 const MusicPlayer: React.FC = () => {
+  const {
+    data: currentTrack,
+    isLoading: isLoadingTrack,
+    refetch: refreshCurrentTrack,
+  } = useGetCurrentTrackQuery();
+  const [performPlay, { isLoading: isLoadingPlay }] = usePerformPlayMutation();
+  const [performPause, { isLoading: isLoadingPause }] =
+    usePerformPauseMutation();
+  const [performSkip, { isLoading: isLoadingSkip }] = usePerformSkipMutation();
+
+  // grab song info every second!
+  useEffect(() => {
+    const interval = setInterval(refreshCurrentTrack, 1000);
+    return () => clearInterval(interval);
+  }, [refreshCurrentTrack]);
+
+  const pauseOrPlay = useCallback(() => {
+    if (!isLoadingTrack && !isLoadingPlay && !isLoadingPause) {
+      if (!currentTrack?.is_playing) {
+        performPlay();
+      } else {
+        performPause();
+      }
+    }
+  }, [
+    isLoadingTrack,
+    currentTrack,
+    performPlay,
+    performPause,
+    isLoadingPlay,
+    isLoadingPause,
+  ]);
+
+  const skip = useCallback(() => {
+    if (!isLoadingTrack && !isLoadingSkip) {
+      performSkip();
+    }
+  }, [isLoadingTrack, isLoadingSkip, performSkip]);
+
+  const getArtistsString = useMemo(() => {
+    if (currentTrack) {
+      return currentTrack.item.artists.map((a) => a.name).join(", ");
+    }
+    return "";
+  }, [currentTrack]);
+
+  const getVotesString = useMemo(() => {
+    if (currentTrack) {
+      return `${currentTrack.votes} / ${currentTrack.votes_to_skip}`;
+    }
+    return "";
+  }, [currentTrack]);
+
+  // cy TODO: move this progress bar optimistically!
+  const songProgress = useMemo(
+    () =>
+      currentTrack
+        ? (currentTrack.progress_ms / currentTrack.item.duration_ms) * 100
+        : 0,
+    [currentTrack]
+  );
+
   return (
-    // todo: configure width movement
-    <AllContainer //width={showQueue ? "75%" : "100%"}
-      height="100%"
-    >
-      <RoomContainer>
-        <LogoHeader />
-        <MusicPlayerLabels>
-          {/* album cover */}
-          <AlbumCoverContainer>
-            <SquareImage src="../public/heartbreakhits.jpg" />
-          </AlbumCoverContainer>
+    <Stack margin="3%" spacing={5}>
+      <Grid container spacing={3} direction="row">
+        {/* album cover */}
+        <Grid size={4}>
+          {/* largest image is first in list */}
+          <SquareImage src={currentTrack?.item.album.images[0].url} />
+        </Grid>
+        <Grid container size={8} gap="3%" direction="column">
           {/* song name, album name, artist name */}
-          <TrackDetailsContainer
-            alignItems="flex-start"
-            direction="column"
-            gap="6%"
+          <StyledText name="title">
+            {currentTrack?.item.name ?? "no track playing"}
+          </StyledText>
+          <StyledText name="header">{currentTrack?.item.album.name}</StyledText>
+          <StyledText name="body">{getArtistsString}</StyledText>
+          <Grid
+            container
+            justifyContent="center"
+            alignContent="center"
+            size="grow"
+            gap={0}
           >
-            <StyledText name="title">Do As The Romans Do</StyledText>
-            <StyledText name="header">Heartbreak Hits</StyledText>
-            <StyledText name="body">Theo Katzman</StyledText>
-            <ButtonsContainer>
-              <IconButton
-              //   onClick={() => {
-              //     //song!.is_playing ? pauseSong() : playSong();
-              //     pauseSong();
-              //   }}
-              >
-                <StyledPause />
-                <StyledPlay />
-              </IconButton>
-              <IconButton
-              //   onClick={() => {
-              //     skipSong();
-              //   }}
-              >
-                <StyledText name="body">5/7</StyledText>
-                {/* {song!.votes} / {song!.votes_required} */}
-                <StyledSkip />
-              </IconButton>
-            </ButtonsContainer>
-          </TrackDetailsContainer>
-        </MusicPlayerLabels>
-        <LinearProgress variant="determinate" value={35} />
-      </RoomContainer>
-    </AllContainer>
+            <Grid>
+              <Tooltip title="Pause/Play Track">
+                <IconButton onClick={pauseOrPlay}>
+                  {currentTrack?.is_playing ? <StyledPause /> : <StyledPlay />}
+                </IconButton>
+              </Tooltip>
+            </Grid>
+            <Grid>
+              <Tooltip title="Skip Track">
+                <IconButton onClick={skip}>
+                  <StyledSkip />
+                  {currentTrack && currentTrack.votes_to_skip > 1 && (
+                    <StyledText name="body">{getVotesString}</StyledText>
+                  )}
+                </IconButton>
+              </Tooltip>
+            </Grid>
+          </Grid>
+        </Grid>
+      </Grid>
+      <StyledLinearProgress variant="determinate" value={songProgress} />
+    </Stack>
   );
 };
 

@@ -15,7 +15,7 @@ const WebPlayback: React.FC<Props> = ({
   playbackInit,
   playbackInitCallback,
 }) => {
-  return <></>;
+  //return <></>;
   useEffect(() => {
     if (playbackInit) {
       //window.Spotify.Player.connect();

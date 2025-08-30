@@ -2,6 +2,9 @@ from django.db import models
 import string
 import random
 
+# note: the spotify project also depends on the models
+# in this file; might do well to separate the responsibilities
+# or at least move these into a common models project
 
 def generate_unique_code():
     length=6
@@ -19,8 +22,8 @@ class Room(models.Model):
     guest_can_queue = models.BooleanField(null=False, default=False)
     votes_to_skip = models.IntegerField(null=False, default=1)
     created_at = models.DateTimeField(auto_now_add=True)
-    current_song = models.CharField(max_length=50, null=True)
+    current_track = models.CharField(max_length=50, null=True)
     
 class RoomMember(models.Model):
-    code = models.CharField(max_length=8, unique=True)
+    room = models.ForeignKey(Room, on_delete=models.CASCADE)
     user_id = models.CharField(max_length=50, unique=True)

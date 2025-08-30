@@ -102,6 +102,52 @@ const RoomFunctional: React.FC<Props> = ({
     );
   }
 
+  // function authenticateSpotify() {
+  //   const url = `/spotify/is-authenticated?host=${isHost}`;
+  //   fetch(url)
+  //     .then((response) => response.json())
+  //     .then((data) => {
+  //       setSpotifyAuthenticated(data.status);
+  //       if (data.status === true) {
+  //         // set auth token for web playback controller
+  //         fetch(`/spotify/get-auth-token?host=${isHost}`)
+  //           .then((response) => {
+  //             if (response.ok) {
+  //               return response.json();
+  //             }
+  //             leaveRoomCallback();
+  //             navigate("/");
+  //           })
+  //           .then((data) => {
+  //             setToken(data.token);
+  //           });
+  //       }
+  //     });
+  // }
+
+  const authenticateSpotify = useCallback(() => {
+    const url = `/spotify/is-authenticated?host=${isHost}`;
+    fetch(url)
+      .then((response) => response.json())
+      .then((data) => {
+        setSpotifyAuthenticated(data.status);
+        if (data.status === true) {
+          // set auth token for web playback controller
+          fetch(`/spotify/get-auth-token?host=${isHost}`)
+            .then((response) => {
+              if (response.ok) {
+                return response.json();
+              }
+              leaveRoomCallback();
+              navigate("/");
+            })
+            .then((data) => {
+              setToken(data.token);
+            });
+        }
+      });
+  }, [isHost, leaveRoomCallback, navigate]);
+
   const getRoomDetails = useCallback(() => {
     // ensure response is OK
     fetch("/api/get-room" + "?code=" + roomCode)
@@ -134,29 +180,6 @@ const RoomFunctional: React.FC<Props> = ({
       leaveRoomCallback();
       navigate("/");
     });
-  }
-
-  function authenticateSpotify() {
-    const url = `/spotify/is-authenticated?host=${isHost}`;
-    fetch(url)
-      .then((response) => response.json())
-      .then((data) => {
-        setSpotifyAuthenticated(data.status);
-        if (data.status === true) {
-          // set auth token for web playback controller
-          fetch(`/spotify/get-auth-token?host=${isHost}`)
-            .then((response) => {
-              if (response.ok) {
-                return response.json();
-              }
-              leaveRoomCallback();
-              navigate("/");
-            })
-            .then((data) => {
-              setToken(data.token);
-            });
-        }
-      });
   }
 
   function renderRoom() {

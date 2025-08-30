@@ -1,50 +1,103 @@
 /// <reference types="spotify-web-playback-sdk" />
-import React from "react";
+import React, { useCallback, useEffect } from "react";
 import styled from "@emotion/styled";
-import { Flex } from "../../components/common/Flex";
 import StyledText from "../../components/common/StyledText";
-import { testTrackList } from "../../utility/testTracks";
+import { useGetQueueQuery } from "../../api/spotifyApi";
+import { addQueryParam, useQueryParams } from "../../utility/queryParams";
+import { useNavigate } from "react-router-dom";
+import { Grid, IconButton, Tooltip } from "@mui/material";
+import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
+import colorScheme from "../../utility/colorScheme";
 
-const QueueContainer = styled.div`
-  height: 100%;
+const getArtistsString = (artists: Spotify.Entity[]) => {
+  return artists.map((a) => a.name).join(", ");
+};
+
+const TrackFade = styled(Grid)`
+  mask-image: linear-gradient(180deg, #000 80%, transparent 100%);
+`;
+
+const LeftBorderGrid = styled(Grid)`
+  border-left: 1px ${colorScheme.gray} solid;
+  padding-left: 7%;
+  padding-right: 7%;
+`;
+
+const SquareImage = styled.img`
   width: 100%;
-  display: grid;
-  grid-template-rows: 10% 90%;
+  aspect-ratio: 1;
+`;
+
+const StyledAdd = styled(AddCircleOutlineIcon)`
+  color: ${colorScheme.gray};
+  font-size: 50px;
 `;
 
 const Queue: React.FC = () => {
+  const {
+    data,
+    isLoading: isLoadingQueue,
+    refetch: refreshQueue,
+  } = useGetQueueQuery();
+  const [showingQueueMenu] = useQueryParams(["queueTrack"]);
+  const navigate = useNavigate();
+
+  // refresh song info every ~5 seconds!
+  useEffect(() => {
+    const interval = setInterval(refreshQueue, 5000);
+    return () => clearInterval(interval);
+  }, [refreshQueue]);
+
+  const openQueueTrackMenu = useCallback(() => {
+    if (!showingQueueMenu) navigate(`?${addQueryParam("queueTrack", "true")}`);
+  }, [showingQueueMenu, navigate]);
+
   return (
-    <Flex direction="column" width="25%" height="100%">
-      <QueueContainer>
-        <Flex>
-          <StyledText name="header">Queue</StyledText>
-        </Flex>
-        <Flex direction="column" justifyContent="start">
-          {testTrackList
-            ? testTrackList.map((song) => (
-                // gives a random string suffix to song id, to prevent duplicate key id
-                <div
-                  key={`${song.id}_randomstring-${(Math.random() + 1)
-                    .toString(36)
-                    .substring(4)}`}
-                >
-                  <Flex>
-                    <Flex>
-                      <img src={"../../public/heartbreakhits.jpg"} width="50" />
-                    </Flex>
-                    <Flex direction="column">
-                      <StyledText name="body">{song.name}</StyledText>
-                      <StyledText name="body">
-                        {song.artists.join(", ")}
-                      </StyledText>
-                    </Flex>
-                  </Flex>
-                </div>
-              ))
-            : null}
-        </Flex>
-      </QueueContainer>
-    </Flex>
+    <LeftBorderGrid container direction="column" gap="2%" height="100%">
+      <Grid
+        container
+        direction="row"
+        justifyContent="space-between"
+        alignContent="center"
+      >
+        <StyledText name="header">up next...</StyledText>
+        <Tooltip title="Add to Queue">
+          <IconButton onClick={openQueueTrackMenu}>
+            <StyledAdd />
+          </IconButton>
+        </Tooltip>
+      </Grid>
+      <TrackFade
+        container
+        overflow="hidden"
+        direction="column"
+        justifyContent="start"
+        gap="1%"
+        size="grow"
+      >
+        {!isLoadingQueue &&
+          data &&
+          data.queue.map((track) => <QueueTrack track={track} />)}
+      </TrackFade>
+    </LeftBorderGrid>
+  );
+};
+
+const QueueTrack: React.FC<{ track: Spotify.Track }> = ({ track }) => {
+  return (
+    <Grid container gap="5%" key={track.id}>
+      <Grid container size={2}>
+        <SquareImage src={track.album.images[0].url} />
+      </Grid>
+      <Grid container direction="column" size={9} justifyContent="center">
+        <StyledText name="body" lineClamp={1}>
+          {track.name}
+        </StyledText>
+        <StyledText name="body" lineClamp={1}>
+          {getArtistsString(track.artists)}
+        </StyledText>
+      </Grid>
+    </Grid>
   );
 };
 

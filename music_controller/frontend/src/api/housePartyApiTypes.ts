@@ -8,7 +8,7 @@ export type Room = {
   created_at: Date;
 };
 
-export type CreateRoomRequest = {
+export type RoomRequest = {
   votes_to_skip: number;
   guest_can_pause: boolean;
   guest_can_queue: boolean;

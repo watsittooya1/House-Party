@@ -1,5 +1,18 @@
-// todo: remove this file once all necessary files import the correct type references
+/// <reference types="spotify-web-playback-sdk" />
 
+export type CurrentSongResponse = {
+  is_playing: boolean;
+  progress_ms: number;
+  item: Spotify.Track;
+  votes: number;
+  votes_to_skip: number;
+};
+
+export type SearchTrackResponse = {
+  tracks: Spotify.Track[];
+};
+
+// TODO: remove when legacy components removed
 export type Song = {
   title: string;
   artist: string;
