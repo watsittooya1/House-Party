@@ -2,7 +2,6 @@ import { type PropsWithChildren } from "react";
 import colorScheme from "../../utility/colorScheme";
 import styled from "@emotion/styled";
 import { Grid } from "@mui/material";
-import LogoHeader from "./LogoHeader";
 import { pageGridPadding } from "../../utility/dimensions";
 
 const Background = styled(Grid)<{ justify?: string; align?: string }>`
@@ -20,7 +19,7 @@ export const PageGrid: React.FC<
     align?: string;
     hideHeader?: boolean;
   } & PropsWithChildren
-> = ({ direction = "row", justify, align, children, hideHeader = false }) => {
+> = ({ direction = "row", justify, align, children }) => {
   return (
     <Background
       container

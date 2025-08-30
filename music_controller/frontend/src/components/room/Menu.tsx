@@ -10,7 +10,7 @@ import {
   removeQueryParam,
   useQueryParams,
 } from "../../utility/queryParams";
-import { Dialog, dialogClasses, Slide } from "@mui/material";
+import { Dialog, dialogClasses, backdropClasses, Slide } from "@mui/material";
 
 const StyledDialog = styled(Dialog)`
   ${`& .${dialogClasses.paper}`} {
@@ -21,6 +21,9 @@ const StyledDialog = styled(Dialog)`
     margin: 0;
     border-top-right-radius: 16px;
     border-bottom-right-radius: 16px;
+  }
+  ${`& .${backdropClasses.root}`} {
+    background-color: transparent;
   }
 `;
 
@@ -57,7 +60,7 @@ const Menu: React.FC<{ show: boolean; onCloseMenu: () => void }> = ({
 
   return (
     <Slide direction="right" in={!!show}>
-      <StyledDialog open hideBackdrop>
+      <StyledDialog open onClose={onCloseMenu}>
         <MenuContainer direction="column" alignItems="flex-start">
           <StyledButton onClick={onCloseMenu} padding="0px 8px" fontSize="24px">
             close menu

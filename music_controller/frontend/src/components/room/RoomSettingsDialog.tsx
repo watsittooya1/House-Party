@@ -1,6 +1,7 @@
 import ArrowDropUpIcon from "@mui/icons-material/ArrowDropUp";
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
 import {
+  backdropClasses,
   Dialog,
   dialogClasses,
   IconButton,
@@ -18,6 +19,8 @@ import { useUpdateRoomMutation } from "../../api/housePartyApi";
 import { removeQueryParam, useQueryParams } from "../../utility/queryParams";
 import useNotifications from "../../utility/notifications";
 
+const MAX_VOTES = 5;
+
 const TitleContainer = styled(Flex)`
   border-bottom: 2px ${colorScheme.gray} solid;
 `;
@@ -30,6 +33,9 @@ const StyledDialog = styled(Dialog)`
     background-color: ${colorScheme.darkGray};
     padding: 5%;
     width: 348px;
+  }
+  ${`& .${backdropClasses.root}`} {
+    background-color: transparent;
   }
 `;
 
@@ -51,7 +57,7 @@ const RoomSettingsDialog: React.FC = () => {
   const navigate = useNavigate();
 
   const increaseVotesToSkip = useCallback(() => {
-    if (votesToSkip < 5) setVotesToSkip(votesToSkip + 1);
+    if (votesToSkip < MAX_VOTES) setVotesToSkip(votesToSkip + 1);
   }, [votesToSkip, setVotesToSkip]);
 
   const decreaseVotesToSkip = useCallback(() => {
@@ -87,7 +93,7 @@ const RoomSettingsDialog: React.FC = () => {
 
   return (
     <Slide direction="up" in={!!show}>
-      <StyledDialog open hideBackdrop>
+      <StyledDialog open hideBackdrop onClose={closeDialog}>
         <Flex gap="16px" direction="column">
           <TitleContainer justifyContent="center" width="80%">
             <StyledText name="header">room settings</StyledText>
