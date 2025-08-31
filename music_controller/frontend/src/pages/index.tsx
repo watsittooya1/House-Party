@@ -1,5 +1,4 @@
 import React, { useMemo, useRef, useEffect, useState } from "react";
-import styled from "@emotion/styled";
 import { Flex } from "../components/common/Flex";
 import { useFrontPageStore } from "../store/FrontPageStore";
 import FrontPage from "../components/frontpage/FrontPage";
@@ -10,13 +9,6 @@ import Login from "../components/frontpage/Login";
 import { PageGrid } from "../components/common/PageGrid";
 
 const LOGO_ANIMATION_PERIOD_SECONDS = 2;
-
-const StyledImg = styled.img<{ y: number }>`
-  aspect-ratio: 1;
-  width: 256px;
-  transform: translateY(${(props) => props.y}px);
-  transition: transform 0.1s linear;
-`;
 
 const SineImg: React.FC<{ src: string }> = ({ src }) => {
   const [y, setY] = useState(0);
@@ -46,7 +38,19 @@ const SineImg: React.FC<{ src: string }> = ({ src }) => {
     return () => cancelAnimationFrame(frame);
   }, [amplitude]);
 
-  return <StyledImg src={src} y={y} />;
+  // opt to use the style prop here instead of styled components so we don't
+  // create a new styling every time the animated position changes
+  return (
+    <img
+      src={src}
+      style={{
+        aspectRatio: "1",
+        width: "256px",
+        transform: `translateY(${y}px)`,
+        transition: "transform 0.05s linear",
+      }}
+    />
+  );
 };
 
 const Main: React.FC = () => {

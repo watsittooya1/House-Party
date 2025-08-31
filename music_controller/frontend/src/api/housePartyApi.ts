@@ -25,7 +25,7 @@ export const housePartyApi = baseApi.injectEndpoints({
     }),
     joinRoom: builder.mutation<{ code: string }, string>({
       query: (roomCode: string) => ({
-        url: `/api/join-room?code=${roomCode}`,
+        url: `/api/room/join/${roomCode}`,
         method: "POST",
       }),
       invalidatesTags: ["Room"],

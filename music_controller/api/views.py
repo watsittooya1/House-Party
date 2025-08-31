@@ -92,11 +92,10 @@ class RoomView(APIView):
             
             
 class JoinRoomView(APIView):
-    def post(self, request):
+    def post(self, request, code):
         if not self.request.session.exists(self.request.session.session_key):
             self.request.session.create()
 
-        code = request.data.get('code')
         if code == None:
             return Response({'Bad Request': 'Room code required'}, status=status.HTTP_400_BAD_REQUEST)
         
@@ -104,7 +103,7 @@ class JoinRoomView(APIView):
         if len(room_membership_query) != 0:
             return Response({'Forbidden': 'User is already in a room'}, status=status.HTTP_403_FORBIDDEN)
         
-        room_query = Room.objects.filter(code=code)
+        room_query = Room.objects.filter(code=code.upper())
         if len(room_query) == 0:
             return Response({'Not Found': 'Room not found'}, status=status.HTTP_404_NOT_FOUND)
         

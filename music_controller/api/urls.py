@@ -7,8 +7,8 @@ urlpatterns = [
     
     # GET, POST, PATCH
     path('room', RoomView.as_view()),
-    
-    path('room/join', JoinRoomView.as_view()),
+
+    path('room/join/<str:code>', JoinRoomView.as_view()),
     path('room/leave', LeaveRoomView.as_view()),
     path('room/current', CurrentRoomView.as_view()),
 ]
