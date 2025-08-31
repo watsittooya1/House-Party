@@ -12,6 +12,7 @@ class RoomsView(generics.ListAPIView):
 class RoomView(APIView):
     lookup_url_kwarg = 'code'
 
+    # cy TODO: this may not be needed
     # GET room
     def get(self, request):
         if not self.request.session.exists(self.request.session.session_key):
@@ -142,7 +143,12 @@ class CurrentRoomView(APIView):
         room_membership_query = RoomMember.objects.filter(user_id=self.request.session.session_key)
         if len(room_membership_query) == 0:
             return JsonResponse({ 'code': None }, status=status.HTTP_200_OK)
-
-        room_membership = room_membership_query[0]
-        return JsonResponse({ 'code': room_membership.room.code }, status=status.HTTP_200_OK)
+        
+        room = Room.objects.filter(code=room_membership_query[0].room.code)
+        if len(room) == 0:
+            return Response({'Room Not Found': 'Invalid Room Code.'}, status=status.HTTP_404_NOT_FOUND)
+            
+        data = RoomSerializer(room[0]).data
+        data['is_host'] = self.request.session.session_key == room[0].host
+        return Response(data, status=status.HTTP_200_OK)
     

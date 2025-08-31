@@ -138,7 +138,7 @@ class PauseSongView(APIView):
         
         room = room_query[0]
         
-        if (self.request.session.session_key != room.host and room.guest_can_pause):
+        if (self.request.session.session_key != room.host and not room.guest_can_pause):
             return Response({'Forbidden': 'Guests are not allowed to play/pause tracks for this room'}, status=status.HTTP_403_FORBIDDEN)
         
         # we pass the sessionId of the host to get room info

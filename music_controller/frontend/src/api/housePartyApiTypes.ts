@@ -13,7 +13,3 @@ export type RoomRequest = {
   guest_can_pause: boolean;
   guest_can_queue: boolean;
 };
-
-export type GetCurrentRoomResponse = {
-  code: string | undefined;
-};

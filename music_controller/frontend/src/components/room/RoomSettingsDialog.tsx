@@ -11,13 +11,14 @@ import {
 import styled from "@emotion/styled";
 import colorScheme from "../../utility/colorScheme";
 import { Flex } from "../common/Flex";
-import { type ChangeEvent, useCallback, useState } from "react";
+import { type ChangeEvent, useCallback, useEffect, useState } from "react";
 import { StyledButton } from "../common/StyledButton";
 import StyledText from "../common/StyledText";
 import { useNavigate } from "react-router-dom";
 import { useUpdateRoomMutation } from "../../api/housePartyApi";
 import { removeQueryParam, useQueryParams } from "../../utility/queryParams";
 import useNotifications from "../../utility/notifications";
+import { Room } from "../../api/housePartyApiTypes";
 
 const MAX_VOTES = 5;
 
@@ -47,14 +48,22 @@ const VotesContainer = styled(Flex)`
   padding-right: 16px;
 `;
 
-const RoomSettingsDialog: React.FC = () => {
+const RoomSettingsDialog: React.FC<{ room: Room | undefined }> = ({ room }) => {
   const [show] = useQueryParams(["editRoom"]);
   const [updateRoom, { isLoading }] = useUpdateRoomMutation();
-  const [votesToSkip, setVotesToSkip] = useState(2);
-  const [guestCanPause, setGuestCanPause] = useState(false);
-  const [guestCanQueue, setGuestCanQueue] = useState(false);
+  const [votesToSkip, setVotesToSkip] = useState<number>(2);
+  const [guestCanPause, setGuestCanPause] = useState<boolean>(false);
+  const [guestCanQueue, setGuestCanQueue] = useState<boolean>(false);
   const { addNotification } = useNotifications();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (room != undefined) {
+      setVotesToSkip(room.votes_to_skip);
+      setGuestCanPause(room.guest_can_pause);
+      setGuestCanQueue(room.guest_can_queue);
+    }
+  }, [room]);
 
   const increaseVotesToSkip = useCallback(() => {
     if (votesToSkip < MAX_VOTES) setVotesToSkip(votesToSkip + 1);
@@ -69,6 +78,8 @@ const RoomSettingsDialog: React.FC = () => {
   }, [navigate]);
 
   const handleUpdateRoom = useCallback(async () => {
+    if (room == undefined) return;
+
     const response = await updateRoom({
       votes_to_skip: votesToSkip,
       guest_can_pause: guestCanPause,
@@ -83,10 +94,11 @@ const RoomSettingsDialog: React.FC = () => {
     }
     closeDialog();
   }, [
+    room,
+    updateRoom,
     votesToSkip,
     guestCanPause,
     guestCanQueue,
-    updateRoom,
     closeDialog,
     addNotification,
   ]);

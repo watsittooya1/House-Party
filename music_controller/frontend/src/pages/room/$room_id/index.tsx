@@ -55,7 +55,7 @@ const Room: React.FC = () => {
     <PageGrid>
       {tokenResponse && <WebPlayback token={tokenResponse.token} />}
       <Menu show={menuIsOpen} onCloseMenu={() => setMenuIsOpen(false)} />
-      <RoomSettingsDialog />
+      <RoomSettingsDialog room={roomResponse} />
       {showQueue && <QueueMenu />}
 
       <Tooltip title="Open Menu">

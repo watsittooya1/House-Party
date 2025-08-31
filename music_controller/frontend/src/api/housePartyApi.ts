@@ -1,9 +1,5 @@
 import { baseApi } from "./baseApi";
-import type {
-  RoomRequest,
-  GetCurrentRoomResponse,
-  Room,
-} from "./housePartyApiTypes";
+import type { RoomRequest, Room } from "./housePartyApiTypes";
 
 export const housePartyApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
@@ -18,10 +14,6 @@ export const housePartyApi = baseApi.injectEndpoints({
         body: request,
       }),
       invalidatesTags: ["Room"],
-    }),
-    getRoom: builder.query<Room, void>({
-      query: () => "/api/get-room",
-      providesTags: ["Room"],
     }),
     joinRoom: builder.mutation<{ code: string }, string>({
       query: (roomCode: string) => ({
@@ -41,13 +33,13 @@ export const housePartyApi = baseApi.injectEndpoints({
     }),
     updateRoom: builder.mutation<void, RoomRequest>({
       query: (request) => ({
-        url: "/api/room",
+        url: `/api/room`,
         method: "PATCH",
         body: request,
       }),
       invalidatesTags: ["Room"],
     }),
-    getCurrentRoom: builder.query<GetCurrentRoomResponse, void>({
+    getCurrentRoom: builder.query<Room, void>({
       query: () => "/api/room/current",
       providesTags: ["Room"],
     }),
@@ -57,7 +49,6 @@ export const housePartyApi = baseApi.injectEndpoints({
 export const {
   useRoomQuery,
   useCreateRoomMutation,
-  useGetRoomQuery,
   useJoinRoomMutation,
   useUserInRoomQuery,
   useLeaveRoomMutation,
