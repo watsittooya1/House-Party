@@ -3,11 +3,11 @@ import { Flex } from "./Flex";
 import StyledText from "./StyledText";
 
 const Container = styled(Flex)`
-  //position: absolute;
-  //top: 5%;
-  //left: 5%;
   justify-content: start;
   gap: 10px;
+  position: absolute;
+  top: 5%;
+  left: 5%;
 `;
 
 const LogoHeader: React.FC = () => {

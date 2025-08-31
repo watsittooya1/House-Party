@@ -17,7 +17,6 @@ import RoomSettingsDialog from "../../../components/room/RoomSettingsDialog";
 import { musicPlayerWidth, queueWidth } from "../../../utility/dimensions";
 import StyledText from "../../../components/common/StyledText";
 import { Flex } from "../../../components/common/Flex";
-import LogoHeader from "../../../components/common/LogoHeader";
 
 const StyledRight = styled(KeyboardArrowRightIcon)`
   color: ${colorScheme.gray};
@@ -30,9 +29,8 @@ const MenuIconButton = styled(IconButton)`
 `;
 
 const RoomCode = styled(Flex)`
-  /* position: absolute;
-  top: 5%;
-  left: ${musicPlayerWidth / 2 - 3}%; */
+  position: absolute;
+  top: 8%;
 `;
 
 const Room: React.FC = () => {
@@ -73,9 +71,8 @@ const Room: React.FC = () => {
         direction="column"
         spacing={2}
       >
-        <Flex direction="column" alignItems="flex-start">
-          <LogoHeader />
-          <RoomCode width="100%" direction="column" justifyContent="center">
+        <Flex direction="column" alignItems="center" justifyContent="center">
+          <RoomCode direction="column" justifyContent="center">
             <StyledText name="subtitle">{`code`}</StyledText>
             <StyledText name="header">{roomResponse?.code}</StyledText>
           </RoomCode>

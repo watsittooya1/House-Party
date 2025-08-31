@@ -7,7 +7,7 @@ import styled from "@emotion/styled";
 import colorScheme from "../../utility/colorScheme";
 import { Flex } from "../common/Flex";
 import { StyledTextField } from "../common/StyledTextField";
-import { ChangeEvent, useCallback, useState } from "react";
+import { type ChangeEvent, useCallback, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import useNotifications from "../../utility/notifications";
 

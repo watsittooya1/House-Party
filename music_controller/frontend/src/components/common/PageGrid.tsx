@@ -3,6 +3,7 @@ import colorScheme from "../../utility/colorScheme";
 import styled from "@emotion/styled";
 import { Grid } from "@mui/material";
 import { pageGridPadding } from "../../utility/dimensions";
+import LogoHeader from "../common/LogoHeader";
 
 const Background = styled(Grid)<{ justify?: string; align?: string }>`
   background-image: radial-gradient(${colorScheme.darkGray}, #121212);
@@ -19,7 +20,7 @@ export const PageGrid: React.FC<
     align?: string;
     hideHeader?: boolean;
   } & PropsWithChildren
-> = ({ direction = "row", justify, align, children }) => {
+> = ({ direction = "row", justify, align, hideHeader = false, children }) => {
   return (
     <Background
       container
@@ -28,9 +29,7 @@ export const PageGrid: React.FC<
       justify={justify}
       align={align}
     >
-      {
-        //!hideHeader && <LogoHeader />
-      }
+      {!hideHeader && <LogoHeader />}
       {children}
     </Background>
   );
