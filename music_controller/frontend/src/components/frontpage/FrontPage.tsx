@@ -20,30 +20,33 @@ const FrontPage: React.FC = () => {
   const [triggerGetAuthUrl] = useLazyGetAuthUrlQuery();
   const { data, isLoading, isError } = useGetUserNameQuery();
 
-  const loginLabel = useMemo(
-    () =>
-      isLoading || isError || data?.username == null
-        ? "Not logged in"
-        : `Logged in as ${data.username}`,
-
-    [isLoading, isError, data]
-  );
-
-  const showLoginDialog = useCallback(() => {
-    triggerGetAuthUrl()
+  const handleLogin = useCallback(() => {
+    triggerGetAuthUrl({ showDialog: true })
       .unwrap()
       .then((resp) => window.location.replace(resp.url));
   }, [triggerGetAuthUrl]);
 
+  const AuthButton = useMemo(() => {
+    if (isLoading || isError || data?.username == null) {
+      return (
+        <Flex direction="column">
+          <StyledButton onClick={handleLogin}>login to spotify</StyledButton>
+        </Flex>
+      );
+    }
+    return (
+      <Flex direction="column">
+        <StyledButton onClick={handleLogin}>change spotify user</StyledButton>
+        <StyledText name="subtitle">{`currently logged in as ${data.username}`}</StyledText>
+      </Flex>
+    );
+  }, [isLoading, isError, data, handleLogin]);
   return (
     <Flex width="316px" gap="30px" direction="column">
       <TitleContainer justifyContent="center">
         <StyledText name="title">house party!</StyledText>
       </TitleContainer>
-      <Flex direction="column">
-        <StyledButton onClick={showLoginDialog}>login to spotify</StyledButton>
-        <StyledText name="subtitle">{loginLabel}</StyledText>
-      </Flex>
+      {AuthButton}
       <StyledButton onClick={() => setStage("CreateRoom")}>
         start a room
       </StyledButton>

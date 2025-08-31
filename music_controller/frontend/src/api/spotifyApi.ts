@@ -6,8 +6,9 @@ import {
 
 export const spotifyApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
-    getAuthUrl: builder.query<{ url: string }, void>({
-      query: () => "/spotify/auth-url",
+    getAuthUrl: builder.query<{ url: string }, { showDialog?: boolean }>({
+      query: (request) =>
+        `/spotify/auth-url?show-dialog=${request.showDialog ?? false}`,
     }),
     getHostToken: builder.query<{ token: string }, void>({
       query: () => "/spotify/host-token",
