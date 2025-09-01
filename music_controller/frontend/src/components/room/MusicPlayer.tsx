@@ -20,6 +20,8 @@ import {
 } from "../../api/spotifyApi";
 import { useShallow } from "zustand/shallow";
 import { useRoomStore } from "../../store/roomStore";
+import useNotifications from "../../utility/notifications";
+import { FetchBaseQueryError } from "@reduxjs/toolkit/query";
 
 const StyledSkip = styled(SkipNextIcon)`
   color: ${colorScheme.gray};
@@ -67,6 +69,7 @@ const MusicPlayer: React.FC = () => {
   const [isHost, guestCanPause] = useRoomStore(
     useShallow((state) => [state.isHost, state.guestCanPause])
   );
+  const { addNotification } = useNotifications();
 
   // grab song info every second!
   useEffect(() => {
@@ -74,10 +77,19 @@ const MusicPlayer: React.FC = () => {
     return () => clearInterval(interval);
   }, [refreshCurrentTrack]);
 
-  const pauseOrPlay = useCallback(() => {
+  const pauseOrPlay = useCallback(async () => {
     if (!isLoadingTrack && !isLoadingPlay && !isLoadingPause) {
       if (!currentTrack?.is_playing) {
-        performPlay();
+        try {
+          await performPlay();
+        } catch (err: unknown) {
+          const error = err as FetchBaseQueryError;
+          if (error?.status === 412) {
+            addNotification({
+              message: "playback failed: Spotify is not active on any device",
+            });
+          }
+        }
       } else {
         performPause();
       }
@@ -89,6 +101,7 @@ const MusicPlayer: React.FC = () => {
     performPause,
     isLoadingPlay,
     isLoadingPause,
+    addNotification,
   ]);
 
   const skip = useCallback(() => {

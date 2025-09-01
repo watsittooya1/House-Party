@@ -35,6 +35,7 @@ const Text = styled.p<{
   name: TypographyType;
   bold?: boolean;
   lineClamp?: number;
+  textAlign?: string;
 }>`
   color: ${colorScheme.gray};
   font-family: Helvetica;
@@ -44,6 +45,7 @@ const Text = styled.p<{
   margin: 0; // p tags seem to have preset margins
   align-content: center;
 
+  ${({ textAlign }) => textAlign && `text-align: ${textAlign};`}
   ${({ lineClamp }) =>
     lineClamp &&
     `overflow-wrap: break-word;
@@ -60,10 +62,11 @@ const StyledText: React.FC<
     name: TypographyType;
     bold?: boolean;
     lineClamp?: number;
+    textAlign?: string;
   } & PropsWithChildren
-> = ({ name, bold, lineClamp, children }) => {
+> = ({ name, bold, lineClamp, textAlign, children }) => {
   return (
-    <Text name={name} bold={bold} lineClamp={lineClamp}>
+    <Text name={name} bold={bold} lineClamp={lineClamp} textAlign={textAlign}>
       {children}
     </Text>
   );

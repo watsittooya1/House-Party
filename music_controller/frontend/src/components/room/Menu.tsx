@@ -1,4 +1,4 @@
-import React, { useCallback } from "react";
+import React, { useCallback, useState } from "react";
 import styled from "@emotion/styled";
 import { Flex } from "../../components/common/Flex";
 import colorScheme from "../../utility/colorScheme";
@@ -13,6 +13,7 @@ import {
 import { Dialog, dialogClasses, backdropClasses, Slide } from "@mui/material";
 import { useShallow } from "zustand/shallow";
 import { useRoomStore } from "../../store/roomStore";
+import StyledText from "../common/StyledText";
 
 const StyledDialog = styled(Dialog)`
   ${`& .${dialogClasses.paper}`} {
@@ -23,6 +24,20 @@ const StyledDialog = styled(Dialog)`
     margin: 0;
     border-top-right-radius: 16px;
     border-bottom-right-radius: 16px;
+  }
+  ${`& .${backdropClasses.root}`} {
+    background-color: transparent;
+  }
+`;
+
+const ConfirmationDialog = styled(Dialog)`
+  margin: auto;
+
+  ${`& .${dialogClasses.paper}`} {
+    border-radius: 16px;
+    background-color: ${colorScheme.darkGray};
+    padding: 5%;
+    width: 348px;
   }
   ${`& .${backdropClasses.root}`} {
     background-color: transparent;
@@ -44,6 +59,8 @@ const Menu: React.FC<{
     useShallow((state) => [state.isHost, state.setShowSettings])
   );
 
+  const [showConfirm, setShowConfirm] = useState(false);
+
   const handleLeaveRoom = useCallback(async () => {
     await leaveRoom();
     navigate("/");
@@ -63,39 +80,81 @@ const Menu: React.FC<{
     onCloseMenu();
   }, [showQueue, navigate, onCloseMenu]);
 
+  const handleCloseRoomClick = () => {
+    if (isHost) {
+      setShowConfirm(true);
+    } else {
+      handleLeaveRoom();
+    }
+  };
+
+  const handleConfirmClose = async () => {
+    setShowConfirm(false);
+    await handleLeaveRoom();
+  };
+
+  const handleCancelClose = () => {
+    setShowConfirm(false);
+  };
+
   return (
-    <Slide direction="right" in={!!show}>
-      <StyledDialog open onClose={onCloseMenu}>
-        <MenuContainer direction="column" alignItems="flex-start">
-          <StyledButton onClick={onCloseMenu} padding="0px 8px" fontSize="24px">
-            close menu
-          </StyledButton>
-          {isHost && (
+    <>
+      <Slide direction="right" in={!!show}>
+        <StyledDialog open onClose={onCloseMenu}>
+          <MenuContainer direction="column" alignItems="flex-start">
             <StyledButton
-              onClick={openEditRoomDialog}
+              onClick={onCloseMenu}
               padding="0px 8px"
               fontSize="24px"
             >
-              edit room settings
+              close menu
             </StyledButton>
-          )}
-          <StyledButton
-            onClick={toggleShowQueue}
-            padding="0px 8px"
-            fontSize="24px"
-          >
-            toggle show queue
-          </StyledButton>
-          <StyledButton
-            onClick={handleLeaveRoom}
-            padding="0px 8px"
-            fontSize="24px"
-          >
-            {isHost ? "close room" : "leave room"}
-          </StyledButton>
-        </MenuContainer>
-      </StyledDialog>
-    </Slide>
+            {isHost && (
+              <StyledButton
+                onClick={openEditRoomDialog}
+                padding="0px 8px"
+                fontSize="24px"
+              >
+                edit room settings
+              </StyledButton>
+            )}
+            <StyledButton
+              onClick={toggleShowQueue}
+              padding="0px 8px"
+              fontSize="24px"
+            >
+              toggle show queue
+            </StyledButton>
+            <StyledButton
+              onClick={handleCloseRoomClick}
+              padding="0px 8px"
+              fontSize="24px"
+            >
+              {isHost ? "close room" : "leave room"}
+            </StyledButton>
+          </MenuContainer>
+        </StyledDialog>
+      </Slide>
+      <ConfirmationDialog open={showConfirm} onClose={handleCancelClose}>
+        <Flex
+          gap="16px"
+          direction="column"
+          alignItems="center"
+          justifyContent="center"
+        >
+          <StyledText name="body" textAlign="center">
+            are you sure you want to close this room? all guests will be
+            removed.
+          </StyledText>
+          <Flex direction="column">
+            <StyledButton onClick={handleCancelClose}>cancel</StyledButton>
+            <StyledButton onClick={handleConfirmClose}>
+              yes, close room
+            </StyledButton>
+          </Flex>
+        </Flex>
+      </ConfirmationDialog>
+    </>
   );
 };
 
