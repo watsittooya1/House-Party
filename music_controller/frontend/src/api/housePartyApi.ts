@@ -1,5 +1,5 @@
 import { baseApi } from "./baseApi";
-import type { RoomRequest, Room } from "./housePartyApiTypes";
+import type { RoomRequest, Room, RoomResponse } from "./housePartyApiTypes";
 
 export const housePartyApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
@@ -39,7 +39,7 @@ export const housePartyApi = baseApi.injectEndpoints({
       }),
       invalidatesTags: ["Room"],
     }),
-    getCurrentRoom: builder.query<Room & { is_host: boolean }, void>({
+    getCurrentRoom: builder.query<RoomResponse, void>({
       query: () => "/api/room/current",
       providesTags: ["Room"],
     }),

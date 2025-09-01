@@ -18,7 +18,9 @@ import { useNavigate } from "react-router-dom";
 import { useUpdateRoomMutation } from "../../api/housePartyApi";
 import { removeQueryParam, useQueryParams } from "../../utility/queryParams";
 import useNotifications from "../../utility/notifications";
-import { Room } from "../../api/housePartyApiTypes";
+import { useShallow } from "zustand/shallow";
+import room from "../../pages/room";
+import { useRoomStore } from "../../store/roomStore";
 
 const MAX_VOTES = 5;
 
@@ -48,7 +50,15 @@ const VotesContainer = styled(Flex)`
   padding-right: 16px;
 `;
 
-const RoomSettingsDialog: React.FC<{ room: Room | undefined }> = ({ room }) => {
+const RoomSettingsDialog: React.FC = () => {
+  const [storedGuestCanPause, storedGuestCanQueue, storedVotesToSkip] =
+    useRoomStore(
+      useShallow((state) => [
+        state.guestCanPause,
+        state.guestCanQueue,
+        state.votesToSkip,
+      ])
+    );
   const [show] = useQueryParams(["editRoom"]);
   const [updateRoom, { isLoading }] = useUpdateRoomMutation();
   const [votesToSkip, setVotesToSkip] = useState<number>(2);
@@ -59,11 +69,11 @@ const RoomSettingsDialog: React.FC<{ room: Room | undefined }> = ({ room }) => {
 
   useEffect(() => {
     if (room != undefined) {
-      setVotesToSkip(room.votes_to_skip);
-      setGuestCanPause(room.guest_can_pause);
-      setGuestCanQueue(room.guest_can_queue);
+      setVotesToSkip(storedVotesToSkip);
+      setGuestCanPause(storedGuestCanPause);
+      setGuestCanQueue(storedGuestCanQueue);
     }
-  }, [room]);
+  }, [storedGuestCanPause, storedGuestCanQueue, storedVotesToSkip]);
 
   const increaseVotesToSkip = useCallback(() => {
     if (votesToSkip < MAX_VOTES) setVotesToSkip(votesToSkip + 1);
@@ -78,8 +88,6 @@ const RoomSettingsDialog: React.FC<{ room: Room | undefined }> = ({ room }) => {
   }, [navigate]);
 
   const handleUpdateRoom = useCallback(async () => {
-    if (room == undefined) return;
-
     const response = await updateRoom({
       votes_to_skip: votesToSkip,
       guest_can_pause: guestCanPause,

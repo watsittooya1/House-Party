@@ -11,6 +11,8 @@ import {
   useQueryParams,
 } from "../../utility/queryParams";
 import { Dialog, dialogClasses, backdropClasses, Slide } from "@mui/material";
+import { useShallow } from "zustand/shallow";
+import { useRoomStore } from "../../store/roomStore";
 
 const StyledDialog = styled(Dialog)`
   ${`& .${dialogClasses.paper}`} {
@@ -32,13 +34,13 @@ const MenuContainer = styled(Flex)`
 `;
 
 const Menu: React.FC<{
-  isHost: boolean;
   show: boolean;
   onCloseMenu: () => void;
-}> = ({ isHost, show, onCloseMenu }) => {
+}> = ({ show, onCloseMenu }) => {
   const navigate = useNavigate();
   const [leaveRoom] = useLeaveRoomMutation();
   const [showQueue] = useQueryParams(["showQueue"]);
+  const [isHost] = useRoomStore(useShallow((state) => [state.isHost]));
 
   const handleLeaveRoom = useCallback(async () => {
     await leaveRoom();

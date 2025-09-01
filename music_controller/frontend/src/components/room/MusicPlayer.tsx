@@ -18,6 +18,8 @@ import {
   usePerformPlayMutation,
   usePerformSkipMutation,
 } from "../../api/spotifyApi";
+import { useShallow } from "zustand/shallow";
+import { useRoomStore } from "../../store/roomStore";
 
 const StyledSkip = styled(SkipNextIcon)`
   color: ${colorScheme.gray};
@@ -62,6 +64,9 @@ const MusicPlayer: React.FC = () => {
   const [performPause, { isLoading: isLoadingPause }] =
     usePerformPauseMutation();
   const [performSkip, { isLoading: isLoadingSkip }] = usePerformSkipMutation();
+  const [isHost, guestCanPause] = useRoomStore(
+    useShallow((state) => [state.isHost, state.guestCanPause])
+  );
 
   // grab song info every second!
   useEffect(() => {
@@ -137,13 +142,19 @@ const MusicPlayer: React.FC = () => {
             size="grow"
             gap={0}
           >
-            <Grid>
-              <Tooltip title="Pause/Play Track">
-                <IconButton onClick={pauseOrPlay}>
-                  {currentTrack?.is_playing ? <StyledPause /> : <StyledPlay />}
-                </IconButton>
-              </Tooltip>
-            </Grid>
+            {(isHost || guestCanPause) && (
+              <Grid>
+                <Tooltip title="Pause/Play Track">
+                  <IconButton onClick={pauseOrPlay}>
+                    {currentTrack?.is_playing ? (
+                      <StyledPause />
+                    ) : (
+                      <StyledPlay />
+                    )}
+                  </IconButton>
+                </Tooltip>
+              </Grid>
+            )}
             <Grid>
               <Tooltip title="Skip Track">
                 <IconButton onClick={skip}>

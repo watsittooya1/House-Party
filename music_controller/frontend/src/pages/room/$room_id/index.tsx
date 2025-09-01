@@ -17,6 +17,8 @@ import RoomSettingsDialog from "../../../components/room/RoomSettingsDialog";
 import { musicPlayerWidth, queueWidth } from "../../../utility/dimensions";
 import StyledText from "../../../components/common/StyledText";
 import { Flex } from "../../../components/common/Flex";
+import { useShallow } from "zustand/shallow";
+import { useRoomStore } from "../../../store/roomStore";
 
 const StyledRight = styled(KeyboardArrowRightIcon)`
   color: ${colorScheme.gray};
@@ -39,6 +41,9 @@ const Room: React.FC = () => {
   const { data: roomResponse, isLoading: roomIsLoading } =
     useGetCurrentRoomQuery();
   const { data: tokenResponse } = useGetHostTokenQuery();
+  const [setRoomState] = useRoomStore(
+    useShallow((state) => [state.setRoomState])
+  );
   const navigate = useNavigate();
 
   // if the user is not in a room, boot them to the front page
@@ -51,15 +56,18 @@ const Room: React.FC = () => {
     }
   }, [roomIsLoading, roomResponse, navigate]);
 
+  // update room state
+  useEffect(() => {
+    if (roomResponse?.code != undefined) {
+      setRoomState(roomResponse);
+    }
+  }, [roomResponse, setRoomState]);
+
   return (
     <PageGrid>
       {tokenResponse && <WebPlayback token={tokenResponse.token} />}
-      <Menu
-        isHost={roomResponse?.is_host ?? false}
-        show={menuIsOpen}
-        onCloseMenu={() => setMenuIsOpen(false)}
-      />
-      <RoomSettingsDialog room={roomResponse} />
+      <Menu show={menuIsOpen} onCloseMenu={() => setMenuIsOpen(false)} />
+      <RoomSettingsDialog />
       {showQueue && <QueueMenu />}
 
       <Tooltip title="Open Menu">

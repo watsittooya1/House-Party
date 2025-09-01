@@ -8,6 +8,8 @@ import { useNavigate } from "react-router-dom";
 import { Grid, IconButton, Tooltip } from "@mui/material";
 import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 import colorScheme from "../../utility/colorScheme";
+import { useShallow } from "zustand/shallow";
+import { useRoomStore } from "../../store/roomStore";
 
 const getArtistsString = (artists: Spotify.Entity[]) => {
   return artists.map((a) => a.name).join(", ");
@@ -39,6 +41,7 @@ const Queue: React.FC = () => {
     isLoading: isLoadingQueue,
     refetch: refreshQueue,
   } = useGetQueueQuery();
+  const [isHost] = useRoomStore(useShallow((state) => [state.isHost]));
   const [showingQueueMenu] = useQueryParams(["queueTrack"]);
   const navigate = useNavigate();
 
@@ -61,11 +64,13 @@ const Queue: React.FC = () => {
         alignContent="center"
       >
         <StyledText name="header">up next...</StyledText>
-        <Tooltip title="Add to Queue">
-          <IconButton onClick={openQueueTrackMenu}>
-            <StyledAdd />
-          </IconButton>
-        </Tooltip>
+        {isHost && (
+          <Tooltip title="Add to Queue">
+            <IconButton onClick={openQueueTrackMenu}>
+              <StyledAdd />
+            </IconButton>
+          </Tooltip>
+        )}
       </Grid>
       <TrackFade
         container
