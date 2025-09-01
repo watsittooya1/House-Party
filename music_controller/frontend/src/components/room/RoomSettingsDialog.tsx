@@ -14,9 +14,7 @@ import { Flex } from "../common/Flex";
 import { type ChangeEvent, useCallback, useEffect, useState } from "react";
 import { StyledButton } from "../common/StyledButton";
 import StyledText from "../common/StyledText";
-import { useNavigate } from "react-router-dom";
 import { useUpdateRoomMutation } from "../../api/housePartyApi";
-import { removeQueryParam, useQueryParams } from "../../utility/queryParams";
 import useNotifications from "../../utility/notifications";
 import { useShallow } from "zustand/shallow";
 import room from "../../pages/room";
@@ -50,7 +48,7 @@ const VotesContainer = styled(Flex)`
   padding-right: 16px;
 `;
 
-const RoomSettingsDialog: React.FC = () => {
+const RoomSettingsDialog: React.FC<{ show: boolean }> = ({ show }) => {
   const [storedGuestCanPause, storedGuestCanQueue, storedVotesToSkip] =
     useRoomStore(
       useShallow((state) => [
@@ -59,13 +57,14 @@ const RoomSettingsDialog: React.FC = () => {
         state.votesToSkip,
       ])
     );
-  const [show] = useQueryParams(["editRoom"]);
   const [updateRoom, { isLoading }] = useUpdateRoomMutation();
   const [votesToSkip, setVotesToSkip] = useState<number>(2);
   const [guestCanPause, setGuestCanPause] = useState<boolean>(false);
   const [guestCanQueue, setGuestCanQueue] = useState<boolean>(false);
   const { addNotification } = useNotifications();
-  const navigate = useNavigate();
+  const [setShowSettings] = useRoomStore(
+    useShallow((state) => [state.setShowSettings])
+  );
 
   useEffect(() => {
     if (room != undefined) {
@@ -84,8 +83,8 @@ const RoomSettingsDialog: React.FC = () => {
   }, [votesToSkip, setVotesToSkip]);
 
   const closeDialog = useCallback(() => {
-    navigate(`?${removeQueryParam("editRoom")}`);
-  }, [navigate]);
+    setShowSettings(false);
+  }, [setShowSettings]);
 
   const handleUpdateRoom = useCallback(async () => {
     const response = await updateRoom({
@@ -106,7 +105,6 @@ const RoomSettingsDialog: React.FC = () => {
     }
     closeDialog();
   }, [
-    room,
     updateRoom,
     votesToSkip,
     guestCanPause,
@@ -116,7 +114,7 @@ const RoomSettingsDialog: React.FC = () => {
   ]);
 
   return (
-    <Slide direction="up" in={!!show}>
+    <Slide direction="up" in={show}>
       <StyledDialog open hideBackdrop onClose={closeDialog}>
         <Flex gap="16px" direction="column">
           <TitleContainer justifyContent="center" width="80%">

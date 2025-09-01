@@ -3,8 +3,6 @@ import React, { useCallback, useEffect } from "react";
 import styled from "@emotion/styled";
 import StyledText from "../../components/common/StyledText";
 import { useGetQueueQuery } from "../../api/spotifyApi";
-import { addQueryParam, useQueryParams } from "../../utility/queryParams";
-import { useNavigate } from "react-router-dom";
 import { Grid, IconButton, Tooltip } from "@mui/material";
 import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 import colorScheme from "../../utility/colorScheme";
@@ -42,9 +40,9 @@ const Queue: React.FC = () => {
     refetch: refreshQueue,
   } = useGetQueueQuery();
   const [isHost] = useRoomStore(useShallow((state) => [state.isHost]));
-  const [showingQueueMenu] = useQueryParams(["queueTrack"]);
-  const navigate = useNavigate();
-
+  const [setShowQueueMenu] = useRoomStore(
+    useShallow((state) => [state.setShowQueueMenu])
+  );
   // refresh song info every ~5 seconds!
   useEffect(() => {
     const interval = setInterval(refreshQueue, 5000);
@@ -52,8 +50,8 @@ const Queue: React.FC = () => {
   }, [refreshQueue]);
 
   const openQueueTrackMenu = useCallback(() => {
-    if (!showingQueueMenu) navigate(`?${addQueryParam("queueTrack", "true")}`);
-  }, [showingQueueMenu, navigate]);
+    setShowQueueMenu(true);
+  }, [setShowQueueMenu]);
 
   return (
     <LeftBorderGrid container direction="column" gap="2%" height="100%">

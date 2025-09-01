@@ -1,5 +1,5 @@
 /// <reference types="spotify-web-playback-sdk" />
-import { type ChangeEvent, useCallback, useEffect, useState } from "react";
+import { type ChangeEvent, useCallback, useState } from "react";
 import {
   Slide,
   Dialog,
@@ -10,8 +10,6 @@ import {
 } from "@mui/material";
 import styled from "@emotion/styled";
 import { useLazySearchTrackQuery } from "../../api/spotifyApi";
-import { useNavigate } from "react-router-dom";
-import { removeQueryParam, useQueryParams } from "../../utility/queryParams";
 import { PageGrid } from "../common/PageGrid";
 import { pageGridPadding, queueWidth } from "../../utility/dimensions";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
@@ -21,6 +19,8 @@ import TrackSearchResult from "./TrackSearchResult";
 import { Flex } from "../common/Flex";
 import StyledText from "../common/StyledText";
 import { StyledTextField } from "../common/StyledTextField";
+import { useShallow } from "zustand/shallow";
+import { useRoomStore } from "../../store/roomStore";
 
 // this is how much we have to offset our dialog so dimensions line up with the music player
 const queueMenuOffset =
@@ -64,13 +64,14 @@ const SearchResultsContainer = styled(Flex)`
 
 const StyledCircularProgress = styled(CircularProgress)``;
 
-const QueueMenu: React.FC = () => {
-  const [show] = useQueryParams(["queueTrack"]);
+const QueueMenu: React.FC<{ show: boolean }> = ({ show }) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [triggerSearch, { isFetching }] = useLazySearchTrackQuery();
   const [searchResults, setSearchResults] = useState<Spotify.Track[]>([]);
   const [searchError, setSearchError] = useState<string>();
-  const navigate = useNavigate();
+  const [setShowQueueMenu] = useRoomStore(
+    useShallow((state) => [state.setShowQueueMenu])
+  );
 
   // cy TODO: handle empty searches in the search input! should show some sort of error
   // cy TODO: handle empty search results
@@ -83,19 +84,13 @@ const QueueMenu: React.FC = () => {
       .then((resp) => setSearchResults(resp.tracks));
   }, [searchQuery, triggerSearch]);
 
-  useEffect(() => {
-    return () => {
-      navigate(`?${removeQueryParam("queueTrack")}`);
-    };
-  }, [navigate]);
-
   const handleExit = useCallback(() => {
-    navigate(`?${removeQueryParam("queueTrack")}`);
-  }, [navigate]);
+    setShowQueueMenu(false);
+  }, [setShowQueueMenu]);
 
   return (
     <Slide direction="up" in={!!show}>
-      <StyledDialog open hideBackdrop>
+      <StyledDialog open hideBackdrop onClose={handleExit}>
         <Offset>
           <PageGrid justify="left" align="flex-end">
             <Flex

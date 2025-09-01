@@ -40,7 +40,9 @@ const Menu: React.FC<{
   const navigate = useNavigate();
   const [leaveRoom] = useLeaveRoomMutation();
   const [showQueue] = useQueryParams(["showQueue"]);
-  const [isHost] = useRoomStore(useShallow((state) => [state.isHost]));
+  const [isHost, setShowSettings] = useRoomStore(
+    useShallow((state) => [state.isHost, state.setShowSettings])
+  );
 
   const handleLeaveRoom = useCallback(async () => {
     await leaveRoom();
@@ -48,9 +50,9 @@ const Menu: React.FC<{
   }, [leaveRoom, navigate]);
 
   const openEditRoomDialog = useCallback(() => {
-    navigate(`?${addQueryParam("editRoom", "true")}`);
+    setShowSettings(true);
     onCloseMenu();
-  }, [navigate, onCloseMenu]);
+  }, [setShowSettings, onCloseMenu]);
 
   const toggleShowQueue = useCallback(() => {
     if (showQueue) {

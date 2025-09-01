@@ -37,12 +37,16 @@ const RoomCode = styled(Flex)`
 
 const Room: React.FC = () => {
   const [showQueue] = useQueryParams(["showQueue"]);
-  const [menuIsOpen, setMenuIsOpen] = useState<boolean>(false);
+  const [showMenu, setShowMenu] = useState<boolean>(false);
   const { data: roomResponse, isLoading: roomIsLoading } =
     useGetCurrentRoomQuery();
   const { data: tokenResponse } = useGetHostTokenQuery();
-  const [setRoomState] = useRoomStore(
-    useShallow((state) => [state.setRoomState])
+  const [showSettings, showQueueMenu, setRoomState] = useRoomStore(
+    useShallow((state) => [
+      state.showSettings,
+      state.showQueueMenu,
+      state.setRoomSettings,
+    ])
   );
   const navigate = useNavigate();
 
@@ -66,12 +70,12 @@ const Room: React.FC = () => {
   return (
     <PageGrid>
       {tokenResponse && <WebPlayback token={tokenResponse.token} />}
-      <Menu show={menuIsOpen} onCloseMenu={() => setMenuIsOpen(false)} />
-      <RoomSettingsDialog />
-      {showQueue && <QueueMenu />}
+      <Menu show={showMenu} onCloseMenu={() => setShowMenu(false)} />
+      <RoomSettingsDialog show={showSettings} />
+      <QueueMenu show={showQueueMenu} />
 
       <Tooltip title="Open Menu">
-        <MenuIconButton onClick={() => setMenuIsOpen(true)}>
+        <MenuIconButton onClick={() => setShowMenu(true)}>
           <StyledRight />
         </MenuIconButton>
       </Tooltip>
