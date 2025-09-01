@@ -54,7 +54,11 @@ const Room: React.FC = () => {
   return (
     <PageGrid>
       {tokenResponse && <WebPlayback token={tokenResponse.token} />}
-      <Menu show={menuIsOpen} onCloseMenu={() => setMenuIsOpen(false)} />
+      <Menu
+        isHost={roomResponse?.is_host ?? false}
+        show={menuIsOpen}
+        onCloseMenu={() => setMenuIsOpen(false)}
+      />
       <RoomSettingsDialog room={roomResponse} />
       {showQueue && <QueueMenu />}
 
@@ -75,6 +79,9 @@ const Room: React.FC = () => {
           <RoomCode direction="column" justifyContent="center">
             <StyledText name="subtitle">{`code`}</StyledText>
             <StyledText name="header">{roomResponse?.code}</StyledText>
+            {roomResponse?.is_host && (
+              <StyledText name="subsubtitle">you are host</StyledText>
+            )}
           </RoomCode>
         </Flex>
         <MusicPlayer />

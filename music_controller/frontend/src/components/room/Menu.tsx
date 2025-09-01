@@ -31,10 +31,11 @@ const MenuContainer = styled(Flex)`
   background-color: ${colorScheme.darkGray};
 `;
 
-const Menu: React.FC<{ show: boolean; onCloseMenu: () => void }> = ({
-  show,
-  onCloseMenu,
-}) => {
+const Menu: React.FC<{
+  isHost: boolean;
+  show: boolean;
+  onCloseMenu: () => void;
+}> = ({ isHost, show, onCloseMenu }) => {
   const navigate = useNavigate();
   const [leaveRoom] = useLeaveRoomMutation();
   const [showQueue] = useQueryParams(["showQueue"]);
@@ -65,13 +66,15 @@ const Menu: React.FC<{ show: boolean; onCloseMenu: () => void }> = ({
           <StyledButton onClick={onCloseMenu} padding="0px 8px" fontSize="24px">
             close menu
           </StyledButton>
-          <StyledButton
-            onClick={openEditRoomDialog}
-            padding="0px 8px"
-            fontSize="24px"
-          >
-            edit room settings
-          </StyledButton>
+          {isHost && (
+            <StyledButton
+              onClick={openEditRoomDialog}
+              padding="0px 8px"
+              fontSize="24px"
+            >
+              edit room settings
+            </StyledButton>
+          )}
           <StyledButton
             onClick={toggleShowQueue}
             padding="0px 8px"
@@ -84,7 +87,7 @@ const Menu: React.FC<{ show: boolean; onCloseMenu: () => void }> = ({
             padding="0px 8px"
             fontSize="24px"
           >
-            close room
+            {isHost ? "close room" : "leave room"}
           </StyledButton>
         </MenuContainer>
       </StyledDialog>

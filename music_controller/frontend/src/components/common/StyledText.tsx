@@ -2,7 +2,12 @@ import { type PropsWithChildren } from "react";
 import colorScheme from "../../utility/colorScheme";
 import styled from "@emotion/styled";
 
-export type TypographyType = "title" | "header" | "body" | "subtitle";
+export type TypographyType =
+  | "title"
+  | "header"
+  | "body"
+  | "subtitle"
+  | "subsubtitle";
 
 type Typography = {
   fontSize: string;
@@ -20,6 +25,9 @@ const TypographyDict: { [T in TypographyType]: Typography } = {
   },
   subtitle: {
     fontSize: "16px",
+  },
+  subsubtitle: {
+    fontSize: "10px",
   },
 };
 

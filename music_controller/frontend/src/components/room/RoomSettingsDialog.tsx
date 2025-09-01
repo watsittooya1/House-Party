@@ -91,6 +91,10 @@ const RoomSettingsDialog: React.FC<{ room: Room | undefined }> = ({ room }) => {
         message: "Failed to update room settings.",
       });
       return;
+    } else {
+      addNotification({
+        message: "Successfully updated room settings.",
+      });
     }
     closeDialog();
   }, [

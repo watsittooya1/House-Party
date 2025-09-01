@@ -39,7 +39,7 @@ export const housePartyApi = baseApi.injectEndpoints({
       }),
       invalidatesTags: ["Room"],
     }),
-    getCurrentRoom: builder.query<Room, void>({
+    getCurrentRoom: builder.query<Room & { is_host: boolean }, void>({
       query: () => "/api/room/current",
       providesTags: ["Room"],
     }),
