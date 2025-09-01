@@ -81,7 +81,7 @@ const MusicPlayer: React.FC = () => {
     if (!isLoadingTrack && !isLoadingPlay && !isLoadingPause) {
       if (!currentTrack?.is_playing) {
         try {
-          await performPlay();
+          await performPlay().unwrap();
         } catch (err: unknown) {
           const error = err as FetchBaseQueryError;
           if (error?.status === 412) {
