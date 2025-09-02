@@ -21,7 +21,7 @@ import {
 import { useShallow } from "zustand/shallow";
 import { useRoomStore } from "../../store/roomStore";
 import useNotifications from "../../utility/notifications";
-import { FetchBaseQueryError } from "@reduxjs/toolkit/query";
+import { type FetchBaseQueryError } from "@reduxjs/toolkit/query";
 
 const StyledSkip = styled(SkipNextIcon)`
   color: ${colorScheme.gray};
@@ -104,11 +104,20 @@ const MusicPlayer: React.FC = () => {
     addNotification,
   ]);
 
-  const skip = useCallback(() => {
+  const skip = useCallback(async () => {
     if (!isLoadingTrack && !isLoadingSkip) {
-      performSkip();
+      try {
+        await performSkip().unwrap();
+      } catch (err: unknown) {
+        const error = err as FetchBaseQueryError;
+        if (error?.status === 403) {
+          addNotification({
+            message: "you've already voted to skip!",
+          });
+        }
+      }
     }
-  }, [isLoadingTrack, isLoadingSkip, performSkip]);
+  }, [isLoadingTrack, isLoadingSkip, performSkip, addNotification]);
 
   const getArtistsString = useMemo(() => {
     if (currentTrack) {

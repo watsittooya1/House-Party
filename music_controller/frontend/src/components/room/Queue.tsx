@@ -39,7 +39,9 @@ const Queue: React.FC = () => {
     isLoading: isLoadingQueue,
     refetch: refreshQueue,
   } = useGetQueueQuery();
-  const [isHost] = useRoomStore(useShallow((state) => [state.isHost]));
+  const [isHost, guestCanQueue] = useRoomStore(
+    useShallow((state) => [state.isHost, state.guestCanQueue])
+  );
   const [setShowQueueMenu] = useRoomStore(
     useShallow((state) => [state.setShowQueueMenu])
   );
@@ -62,7 +64,7 @@ const Queue: React.FC = () => {
         alignContent="center"
       >
         <StyledText name="header">up next...</StyledText>
-        {isHost && (
+        {(isHost || guestCanQueue) && (
           <Tooltip title="Add to Queue">
             <IconButton onClick={openQueueTrackMenu}>
               <StyledAdd />

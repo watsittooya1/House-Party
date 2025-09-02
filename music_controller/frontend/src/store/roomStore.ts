@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { RoomResponse } from "../api/housePartyApiTypes";
+import { type RoomResponse } from "../api/housePartyApiTypes";
 
 type RoomState = {
   showSettings: boolean;
@@ -25,7 +25,7 @@ export const useRoomStore = create<RoomState>()((set) => ({
       ...state,
       isHost: roomResponse.is_host,
       votesToSkip: roomResponse.votes_to_skip,
-      guestCanSkip: roomResponse.guest_can_pause,
+      guestCanPause: roomResponse.guest_can_pause,
       guestCanQueue: roomResponse.guest_can_queue,
     })),
   setShowSettings: (show: boolean) =>
