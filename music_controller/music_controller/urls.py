@@ -21,7 +21,8 @@ from .gsc_verif import gsc_verif_index
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/', include('api.urls')),
-    path('', include('frontend.urls')),
     path('spotify/', include('spotify.urls')),
-    path('google8725c32bef7fb570.html', gsc_verif_index)
+    path('google8725c32bef7fb570.html', gsc_verif_index),
+    # note: because we use wildcard urls in frontend, this entry MUST be last
+    path('', include('frontend.urls')),
 ]
