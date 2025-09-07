@@ -5,3 +5,4 @@ Scripts
 frontend/node_modules
 Lib
 *.cfg
+ssh_keys
