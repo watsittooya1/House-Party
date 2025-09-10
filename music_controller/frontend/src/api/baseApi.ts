@@ -12,7 +12,7 @@ export const tagTypes = ["Track", "Token", "Room", "Login", "Queue"] as const;
 
 export const baseApi = createApi({
   baseQuery: fetchBaseQuery({
-    baseUrl: `${window.location.protocol}//${window.location.hostname}:8000`,
+    baseUrl: `${window.location.protocol}//${window.location.hostname}`,
     credentials: "include",
     prepareHeaders: getCsrfHeader,
   }),

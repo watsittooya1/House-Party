@@ -1,3 +1,5 @@
+NOTE FOR FUTURE CHRIS: when configuring, change posix user in nginx config to owner of project directory!
+
 NOTE: you won't be able to take advantage of playback or queueing after connecting your Spotify account, this app is in development mode. Spotify unfortunately will not approve this project for extension as it is a hobby project, so any users that wish to use the site's functionality will have to have their premium account email registered under the app, by me. More info here: https://developer.spotify.com/blog/2023-05-29-quota-extension
 
 House Party is a web app that allows users to join and host common Spotify radio rooms, using only one premium account! Users can control audio playback, add songs to queue, skip songs, and even play audio from the browser.
